@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Education App - Offline Detection</title>
+  <style>
+    #offlineBanner {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      background: #ff4136;
+      color: #fff;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 1.1rem;
+      z-index: 9999;
+      font-family: Arial, sans-serif;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div id="offlineBanner">You are offline. Some features may not work.</div>
+
+  <!-- Your page content here -->
+
+  <script>
+    const offlineBanner = document.getElementById('offlineBanner');
+    function updateOfflineBanner() {
+      if (navigator.onLine) {
+        offlineBanner.style.display = 'none';
+      } else {
+        offlineBanner.style.display = 'block';
+      }
+    }
+    window.addEventListener('online', updateOfflineBanner);
+    window.addEventListener('offline', updateOfflineBanner);
+    // Run on page load
+    updateOfflineBanner();
+  </script>
+</body>
+</html>
