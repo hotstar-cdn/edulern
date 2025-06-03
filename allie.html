@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Tourist Family Movie Preview</title>
+  <title>vol 1</title>
   <meta name="viewport" content="width=400, initial-scale=1.0">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
   <style>
     body {
       background: #131313;
@@ -26,6 +29,7 @@
       object-fit: cover;
       border-bottom-left-radius: 30px;
       border-bottom-right-radius: 30px;
+      background: #222;
     }
     .logo-title {
       width: 90%;
@@ -82,6 +86,9 @@
       cursor: pointer;
       box-shadow: 0 2px 8px #0007;
       transition: background 0.2s, color 0.2s;
+      text-align: center;
+      text-decoration: none;
+      display: block;
     }
     .watch-btn:hover {
       background: #35aaff;
@@ -104,6 +111,7 @@
       color: #fff;
       font-size: 14px;
       margin-right: 7px;
+      margin-bottom: 5px;
     }
     .desc-text {
       margin: 18px auto;
@@ -158,27 +166,20 @@
 </head>
 <body>
   <div class="main-container">
-    <img src="https://user-images.githubusercontent.com/PLACEHOLDER_FOR_IMAGE1_URL.jpg" alt="Movie Main Visual" class="top-image" />
+    <img id="top-image" src="" alt="Movie Main Visual" class="top-image" />
     <div class="logo-title">
-      <img src="https://static.hotstar.com/tourist-family-logo.png" class="movie-logo" alt="Tourist Family Logo" />
-      <div class="newly">Newly Added</div>
-      <div class="meta">
-        <span>2025</span>
-        <span>U</span>
-        <span>2h 6m</span>
-        <span>5 Languages</span>
+      <img id="movie-logo" src="" class="movie-logo" alt="Movie Logo" />
+      <div class="newly" id="badge-text">Newly Added</div>
+      <div class="meta" id="meta">
+        <!-- Meta info populated by JS -->
       </div>
-      <a class="watch-btn" href="https://example.com/?=tourist-family" target="_blank">▶ Watch Now</a>
+      <a class="watch-btn" id="watch-btn" href="#" target="_blank">▶ Watch Now</a>
     </div>
-    <div class="genre-row">
-      <span>Comedy</span>
-      <span>Drama</span>
-      <span>Dramedy</span>
-      <span>Family-Friendly</span>
-      <span>Immigration</span>
+    <div class="genre-row" id="genres">
+      <!-- Genres populated by JS -->
     </div>
-    <div class="desc-text">
-      Seeking refuge in Tamil Nadu, Das and his family face tough trials. However, through acts of kindness, they find the home and hope they never imagined.
+    <div class="desc-text" id="desc">
+      <!-- Description populated by JS -->
     </div>
     <div class="actions">
       <div class="action-item">
@@ -210,5 +211,73 @@
     <symbol id="icon-download" viewBox="0 0 32 32"><path d="M16 6v16M8 19l8 8 8-8"/><rect x="6" y="28" width="20" height="2" rx="1"/></symbol>
     <symbol id="icon-heart" viewBox="0 0 32 32"><path d="M23 7c-2.8 0-4.7 2.3-7 5.4C13.7 9.3 11.8 7 9 7 5.1 7 3 10.2 3 13.7c0 6.5 10.7 12.3 12.1 13 1.3-0.7 12.1-6.5 12.1-13C29 10.2 26.9 7 23 7z" fill="#b1b1b1"/></symbol>
   </svg>
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBROgYUR-2rakUxHbl90JlynP_X3f0GxIM",
+      authDomain: "diseny-plus-hotstar-database.firebaseapp.com",
+      projectId: "diseny-plus-hotstar-database",
+      storageBucket: "diseny-plus-hotstar-database.firebasestorage.app",
+      messagingSenderId: "582861150339",
+      appId: "1:582861150339:web:0d2b69a2ae914342b723b6",
+      measurementId: "G-HX223WNVKE"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Helper to get query code from URL (example.com/?=moviecode)
+    function getCodeFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      // Accept ?=moviecode or ?code=moviecode
+      let code = params.get('');
+      if (!code) code = params.get('code');
+      return code || 'tourist-family'; // Default for demo
+    }
+
+    async function fetchMovieData(code) {
+      // Adjust collection/doc structure as needed
+      // For demo: collection 'movies', doc 'code'
+      const docRef = db.collection('movies').doc(code);
+      const doc = await docRef.get();
+      if (!doc.exists) {
+        alert('Movie data not found!');
+        return null;
+      }
+      return doc.data();
+    }
+
+    function renderMovie(data) {
+      document.getElementById('top-image').src = data.posterUrl || data.imageUrl || '';
+      document.getElementById('movie-logo').src = data.logoUrl || '';
+      document.getElementById('desc').textContent = data.description || '';
+      document.getElementById('watch-btn').href = data.redirectUrl || '#';
+
+      // Meta: year, rating, duration, languages
+      const metaDiv = document.getElementById('meta');
+      metaDiv.innerHTML = '';
+      if (data.year) metaDiv.innerHTML += `<span>${data.year}</span>`;
+      if (data.rating) metaDiv.innerHTML += `<span>${data.rating}</span>`;
+      if (data.duration) metaDiv.innerHTML += `<span>${data.duration}</span>`;
+      if (data.languages) metaDiv.innerHTML += `<span>${data.languages}</span>`;
+
+      // Genres
+      const genresDiv = document.getElementById('genres');
+      genresDiv.innerHTML = '';
+      if (data.genres) {
+        (Array.isArray(data.genres) ? data.genres : data.genres.split(',')).forEach(g => {
+          if (g.trim()) genresDiv.innerHTML += `<span>${g.trim()}</span>`;
+        });
+      }
+      // Badge text (optional)
+      if (data.badge) document.getElementById('badge-text').textContent = data.badge;
+    }
+
+    // On page load
+    (async function() {
+      const code = getCodeFromUrl();
+      const movieData = await fetchMovieData(code);
+      if (movieData) renderMovie(movieData);
+    })();
+  </script>
 </body>
 </html>
