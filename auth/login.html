@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - ALLEN</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="main-container">
+    <div class="header-bar">
+      <span class="back-arrow" onclick="window.history.back()">&larr;</span>
+      <span class="brand">ALLEN</span>
+    </div>
+    <div class="form-title">Login with Email ID</div>
+    <form class="form-block" id="loginForm" autocomplete="on">
+      <div class="input-group">
+        <input type="email" id="email" placeholder="Email" required autocomplete="username">
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+        <button type="button" class="toggle-password" tabindex="-1" aria-label="Show/Hide Password" onclick="togglePassword('password', this)">
+          <svg viewBox="0 0 24 24" height="21" width="21" fill="none" stroke="#23252b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/><line x1="4.21" y1="4.21" x2="19.79" y2="19.79" stroke="#23252b" stroke-width="2" /></svg>
+        </button>
+      </div>
+      <a class="form-link" href="#" id="forgotPassword">Forgot password?</a>
+      <button id="loginBtn" class="form-button" type="submit">Login</button>
+      <div id="loginMsg" style="color:#d44;text-align:center;margin-top:8px;"></div>
+    </form>
+    <div class="bottom-bar">
+      Having trouble? Write us at <a href="mailto:wecare@allen.in">wecare@allen.in</a>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script>
+    // Firebase config: Inserted directly
+    const firebaseConfig = {
+      apiKey: "AIzaSyAyxVsJbtLZO8x7XFSpsb7euQBQx49FHVY",
+      authDomain: "mci-x-edulearn-auth.firebaseapp.com",
+      projectId: "mci-x-edulearn-auth",
+      storageBucket: "mci-x-edulearn-auth.appspot.com",
+      messagingSenderId: "88930118847",
+      appId: "1:88930118847:web:aea76da894c3e57eb7ea0a",
+      measurementId: "G-2VLHB30TVF"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function togglePassword(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === "password") {
+        input.type = "text";
+        btn.querySelector("svg").style.opacity = 0.5;
+      } else {
+        input.type = "password";
+        btn.querySelector("svg").style.opacity = 1;
+      }
+    }
+
+    document.getElementById('loginForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const loginMsg = document.getElementById('loginMsg');
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      loginMsg.textContent = '';
+      document.getElementById('loginBtn').disabled = true;
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        loginMsg.style.color = "green";
+        loginMsg.textContent = "Login successful! Redirecting…";
+        setTimeout(() => window.location.href = "profile.html", 1000);
+      } catch (err) {
+        loginMsg.style.color = "#d44";
+        loginMsg.textContent = err.message;
+        document.getElementById('loginBtn').disabled = false;
+      }
+    };
+
+    document.getElementById('forgotPassword').onclick = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      if (!email) {
+        alert('Please enter your email above to receive a reset link.');
+        return;
+      }
+      auth.sendPasswordResetEmail(email).then(function() {
+        alert('Password reset email sent!');
+      }).catch(function(error) {
+        alert(error.message);
+      });
+    };
+  </script>
+</body>
+</html>
