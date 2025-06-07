@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile - ALLEN</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .profile-details {
+      text-align: left;
+      margin-top: 30px;
+    }
+    .profile-details img {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+      border: 2px solid #d1d8e2;
+      margin-bottom: 16px;
+    }
+    .profile-details .field-label {
+      font-weight: 600;
+      color: #31353b;
+      margin-right: 8px;
+    }
+    .profile-details .field-value {
+      color: #222;
+      display: block;
+      margin-bottom: 10px;
+      font-size: 1.08rem;
+    }
+    .profile-actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 16px;
+    }
+    .profile-actions a, .profile-actions button {
+      flex: 1;
+      padding: 12px 0;
+      border-radius: 16px;
+      border: none;
+      background: #2163c6;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .profile-actions a:hover, .profile-actions button:hover {
+      background: #1a4ea6;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="header-bar">
+      <span class="back-arrow" onclick="window.history.back()">&larr;</span>
+      <span class="brand">ALLEN</span>
+    </div>
+    <div class="form-title">Profile</div>
+    <div class="profile-details" id="profileDetails">
+      <img id="profilePic" src="https://via.placeholder.com/72x72.png?text=+" alt="Profile Picture">
+      <div><span class="field-label">Full Name:</span><span class="field-value" id="name"></span></div>
+      <div><span class="field-label">Father's Name:</span><span class="field-value" id="fathersName"></span></div>
+      <div><span class="field-label">Mother's Name:</span><span class="field-value" id="mothersName"></span></div>
+      <div><span class="field-label">Mobile:</span><span class="field-value" id="mobile"></span></div>
+      <div><span class="field-label">Email:</span><span class="field-value" id="email"></span></div>
+      <div><span class="field-label">Class:</span><span class="field-value" id="class"></span></div>
+      <div><span class="field-label">Subject:</span><span class="field-value" id="subject"></span></div>
+      <div><span class="field-label">School:</span><span class="field-value" id="school"></span></div>
+      <div><span class="field-label">Address:</span><span class="field-value" id="address"></span></div>
+      <div><span class="field-label">Parents Contact:</span><span class="field-value" id="parentsContact"></span></div>
+      <div class="profile-actions">
+        <a href="edit.html">Edit</a>
+        <button id="logoutBtn" type="button">Logout</button>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      Having trouble? Write us at <a href="mailto:wecare@allen.in">wecare@allen.in</a>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAyxVsJbtLZO8x7XFSpsb7euQBQx49FHVY",
+      authDomain: "mci-x-edulearn-auth.firebaseapp.com",
+      projectId: "mci-x-edulearn-auth",
+      storageBucket: "mci-x-edulearn-auth.appspot.com",
+      messagingSenderId: "88930118847",
+      appId: "1:88930118847:web:aea76da894c3e57eb7ea0a",
+      measurementId: "G-2VLHB30TVF"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      const docRef = db.collection("users").doc(user.uid);
+      const docSnap = await docRef.get();
+      if(docSnap.exists){
+        const d = docSnap.data();
+        document.getElementById('profilePic').src = d.photoURL || "https://via.placeholder.com/72x72.png?text=+";
+        document.getElementById('name').textContent = d.name || "";
+        document.getElementById('fathersName').textContent = d.fathersName || "";
+        document.getElementById('mothersName').textContent = d.mothersName || "";
+        document.getElementById('mobile').textContent = d.mobile || "";
+        document.getElementById('email').textContent = d.email || "";
+        document.getElementById('class').textContent = d.class || "";
+        document.getElementById('subject').textContent = d.subject || "";
+        document.getElementById('school').textContent = d.school || "";
+        document.getElementById('address').textContent = d.address || "";
+        document.getElementById('parentsContact').textContent = d.parentsContact || "";
+      }
+    });
+
+    document.getElementById('logoutBtn').onclick = async function(){
+      await auth.signOut();
+      window.location.href = "login.html";
+    };
+  </script>
+</body>
+</html>
