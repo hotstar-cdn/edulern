@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup - ALLEN</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ...profile-image-upload styles... */
+    .profile-image-upload {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    .profile-image-upload img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #d1d8e2;
+      background: #fff;
+    }
+    .profile-image-upload input[type="file"] {
+      display: none;
+    }
+    .upload-label {
+      background: #2163c6;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.2s;
+      border: none;
+    }
+    .upload-label:hover {
+      background: #1a4ea6;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="header-bar">
+      <span class="back-arrow" onclick="window.history.back()">&larr;</span>
+      <span class="brand">ALLEN</span>
+    </div>
+    <div class="form-title">Sign Up with Email ID</div>
+    <form class="form-block" id="signupForm" autocomplete="on">
+      <div class="profile-image-upload">
+        <img id="profilePicPreview" src="https://via.placeholder.com/56x56.png?text=+" alt="Profile" />
+        <label class="upload-label" for="profilePic">Choose Photo</label>
+        <input type="file" id="profilePic" accept="image/*">
+      </div>
+      <div class="input-group"><input type="text" id="name" placeholder="Full Name" required></div>
+      <div class="input-group"><input type="text" id="fathersName" placeholder="Father's Name" required></div>
+      <div class="input-group"><input type="text" id="mothersName" placeholder="Mother's Name" required></div>
+      <div class="input-group"><input type="tel" id="mobile" placeholder="Mobile No" required></div>
+      <div class="input-group"><input type="email" id="email" placeholder="Email" required autocomplete="username"></div>
+      <div class="input-group">
+        <select id="class" required>
+          <option value="" disabled selected>Class</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <select id="subject" required>
+          <option value="" disabled selected>Subject</option>
+          <option value="Science">Science</option>
+          <option value="Math">Math</option>
+        </select>
+      </div>
+      <div class="input-group"><input type="text" id="school" placeholder="School Name" required></div>
+      <div class="input-group"><textarea id="address" placeholder="Address" required style="resize:none;height:54px"></textarea></div>
+      <div class="input-group"><input type="tel" id="parentsContact" placeholder="Parents Contact No" required></div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Password" required autocomplete="new-password">
+        <button type="button" class="toggle-password" tabindex="-1" aria-label="Show/Hide Password" onclick="togglePassword('password', this)">
+          <svg viewBox="0 0 24 24" height="21" width="21" fill="none" stroke="#23252b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/><line x1="4.21" y1="4.21" x2="19.79" y2="19.79" stroke="#23252b" stroke-width="2" /></svg>
+        </button>
+      </div>
+      <a class="form-link" href="login.html">Already have an account?</a>
+      <button id="signupBtn" class="form-button" type="submit">Sign Up</button>
+      <div id="signupMsg" style="color:#d44;text-align:center;margin-top:8px;"></div>
+    </form>
+    <div class="bottom-bar">
+      Having trouble? Write us at <a href="mailto:wecare@allen.in">wecare@allen.in</a>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script>
+    // Firebase config: Inserted directly and fixed bucket!
+    const firebaseConfig = {
+      apiKey: "AIzaSyAyxVsJbtLZO8x7XFSpsb7euQBQx49FHVY",
+      authDomain: "mci-x-edulearn-auth.firebaseapp.com",
+      projectId: "mci-x-edulearn-auth",
+      storageBucket: "mci-x-edulearn-auth.appspot.com",
+      messagingSenderId: "88930118847",
+      appId: "1:88930118847:web:aea76da894c3e57eb7ea0a",
+      measurementId: "G-2VLHB30TVF"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // Profile pic preview
+    document.getElementById('profilePic').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = function(ev){
+          document.getElementById('profilePicPreview').src = ev.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+    document.querySelector('.upload-label').onclick = function(){
+      document.getElementById('profilePic').click();
+    };
+
+    // Password visibility toggle
+    function togglePassword(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === "password") {
+        input.type = "text";
+        btn.querySelector("svg").style.opacity = 0.5;
+      } else {
+        input.type = "password";
+        btn.querySelector("svg").style.opacity = 1;
+      }
+    }
+
+    document.getElementById('signupForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const signupMsg = document.getElementById('signupMsg');
+      const signupBtn = document.getElementById('signupBtn');
+      signupMsg.textContent = '';
+      signupBtn.disabled = true;
+
+      // Collect values
+      const picFile = document.getElementById('profilePic').files[0];
+      const name = document.getElementById('name').value.trim();
+      const fathersName = document.getElementById('fathersName').value.trim();
+      const mothersName = document.getElementById('mothersName').value.trim();
+      const mobile = document.getElementById('mobile').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const classVal = document.getElementById('class').value;
+      const subject = document.getElementById('subject').value;
+      const school = document.getElementById('school').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const parentsContact = document.getElementById('parentsContact').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        // 1. Create Auth user
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const uid = userCredential.user.uid;
+
+        // 2. Upload profile pic
+        let photoURL = '';
+        if(picFile){
+          const storageRef = storage.ref('profilePics/' + uid);
+          await storageRef.put(picFile);
+          photoURL = await storageRef.getDownloadURL();
+        }
+        // 3. Store user data in Firestore
+        await db.collection("users").doc(uid).set({
+          name, fathersName, mothersName, mobile, email, class: classVal, subject, school, address, parentsContact, photoURL
+        });
+
+        signupMsg.style.color = 'green';
+        signupMsg.textContent = 'Signup successful! Redirecting...';
+        setTimeout(()=>window.location.href="profile.html", 1500);
+      } catch (err) {
+        signupMsg.style.color = '#d44';
+        signupMsg.textContent = err.message;
+        signupBtn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
