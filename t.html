@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Panel</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
+    .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
+    input, button { width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Schedule or Start Class</h2>
+    <input id="classTitle" placeholder="Class Title" required>
+    <input id="classTime" type="datetime-local" required>
+    <button id="scheduleBtn">Schedule / Start Now</button>
+    <p id="statusMsg" style="color:green;"></p>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDvKhzHTcSmj3Z64oePRGP2TeEd_5A4RVU",
+      authDomain: "authentication-c6c71.firebaseapp.com",
+      databaseURL: "https://authentication-c6c71-default-rtdb.firebaseio.com",
+      projectId: "authentication-c6c71",
+      storageBucket: "authentication-c6c71.firebasestorage.app",
+      messagingSenderId: "707906547881",
+      appId: "1:707906547881:web:55c67cf3e7e867951c39b8",
+      measurementId: "G-ZKY9SXX8N8"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    document.getElementById("scheduleBtn").addEventListener("click", () => {
+      const title = document.getElementById("classTitle").value.trim();
+      const time = document.getElementById("classTime").value.trim();
+      const statusMsg = document.getElementById("statusMsg");
+
+      if (!title || !time) {
+        alert("Please fill in both class title and time.");
+        return;
+      }
+
+      const meetLink = "https://meet.google.com/byk-ammd-tof?ijlm=1749365120566&hs=187&adhoc=1";
+
+      const classData = {
+        title: title,
+        time: time,
+        link: meetLink,
+        timestamp: Date.now()
+      };
+
+      db.ref("currentClass").set(classData)
+        .then(() => {
+          statusMsg.innerText = "✅ Class scheduled successfully!";
+        })
+        .catch((error) => {
+          console.error("Firebase Error:", error);
+          alert("Something went wrong. Check the console for details.");
+        });
+    });
+  </script>
+</body>
+</html>
