@@ -1,43 +1,68 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Adsterra Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- ✅ Google AdSense Meta Tag -->
+  <meta name="google-adsense-account" content="ca-pub-6353376980503200" />
+
+  <!-- ✅ AdSense Ad Code -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6353376980503200"
+    crossorigin="anonymous"></script>
+
+  <title>Google Ads Page</title>
+
   <style>
     body {
       margin: 0;
-      padding: 0;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      background: #f4f4f4;
+      min-height: 100vh;
+      flex-direction: column;
     }
 
     .ad-container {
-      width: 320px;
-      height: 50px;
-      border: 2px dashed #ccc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #fff;
+      width: 100%;
+      max-width: 320px;
+      margin: 20px auto;
+      background: white;
+      padding: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    /* Responsive Ad Styles */
+    .ad-space {
+      display: block;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="ad-container" id="ad-area">
-    <!-- Adsterra ad script goes here -->
-    <!-- Example: -->
-    <!-- <script type="text/javascript" src="https://www.profitabledisplaynetwork.com/script/s.js?z=1234567"></script> -->
+
+  <h1>Welcome to My Page</h1>
+
+  <!-- ✅ Google Ad Container -->
+  <div class="ad-container">
+    <ins class="adsbygoogle ad-space"
+         style="display:block"
+         data-ad-client="ca-pub-6353376980503200"
+         data-ad-slot="1234567890"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
   </div>
 
-  <script>
-    // You can manipulate ad logic here if needed.
-    console.log("Adsterra ad loaded.");
-  </script>
 </body>
 </html>
