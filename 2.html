@@ -1,47 +1,43 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Student Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adsterra Example</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #eef2f3; }
-    .card { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #ccc; text-align: center; }
-    .card h2 { margin: 10px 0; }
-    .card p { margin: 5px 0; }
-    .join-btn { margin-top: 15px; padding: 10px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f4f4f4;
+    }
+
+    .ad-container {
+      width: 320px;
+      height: 50px;
+      border: 2px dashed #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
+    }
   </style>
 </head>
 <body>
-  <div class="card" id="classCard" style="display:none">
-    <h2 id="title"></h2>
-    <p id="time"></p>
-    <button class="join-btn" id="joinBtn">Join Class</button>
+  <div class="ad-container" id="ad-area">
+    <!-- Adsterra ad script goes here -->
+    <!-- Example: -->
+    <!-- <script type="text/javascript" src="https://www.profitabledisplaynetwork.com/script/s.js?z=1234567"></script> -->
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script>
-    const firebaseConfig = {
-     apiKey: "AIzaSyBROgYUR-2rakUxHbl90JlynP_X3f0GxIM",
-  authDomain: "diseny-plus-hotstar-database.firebaseapp.com",
-  projectId: "diseny-plus-hotstar-database",
-  storageBucket: "diseny-plus-hotstar-database.firebasestorage.app",
-  messagingSenderId: "582861150339",
-  appId: "1:582861150339:web:0d2b69a2ae914342b723b6",
-  measurementId: "G-HX223WNVKE"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    db.ref("currentClass").on("value", (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        document.getElementById("title").innerText = data.title;
-        document.getElementById("time").innerText = `Scheduled At: ${new Date(data.time).toLocaleString()}`;
-        document.getElementById("joinBtn").onclick = () => window.location.href = data.link;
-        document.getElementById("classCard").style.display = "block";
-      }
-    });
+    // You can manipulate ad logic here if needed.
+    console.log("Adsterra ad loaded.");
   </script>
 </body>
 </html>
