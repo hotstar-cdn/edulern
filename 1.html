@@ -1,69 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Teacher Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adsterra Ad Example</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
-    .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
-    input, button { width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-    button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+
+    .ad-container {
+      border: 2px dashed #aaa;
+      background: #fff;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Schedule or Start Class</h2>
-    <input id="classTitle" placeholder="Class Title" required>
-    <input id="classTime" type="datetime-local" required>
-    <button id="scheduleBtn">Schedule / Start Now</button>
-    <p id="statusMsg" style="color:green;"></p>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBROgYUR-2rakUxHbl90JlynP_X3f0GxIM",
-  authDomain: "diseny-plus-hotstar-database.firebaseapp.com",
-  projectId: "diseny-plus-hotstar-database",
-  storageBucket: "diseny-plus-hotstar-database.firebasestorage.app",
-  messagingSenderId: "582861150339",
-  appId: "1:582861150339:web:0d2b69a2ae914342b723b6",
-  measurementId: "G-HX223WNVKE"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    document.getElementById("scheduleBtn").addEventListener("click", () => {
-      const title = document.getElementById("classTitle").value.trim();
-      const time = document.getElementById("classTime").value.trim();
-      const statusMsg = document.getElementById("statusMsg");
-
-      if (!title || !time) {
-        alert("Please fill in both class title and time.");
-        return;
-      }
-
-      const meetLink = "https://meet.google.com/byk-ammd-tof?ijlm=1749365120566&hs=187&adhoc=1";
-
-      const classData = {
-        title: title,
-        time: time,
-        link: meetLink,
-        timestamp: Date.now()
+  <div class="ad-container">
+    <!-- Adsterra Ad Code -->
+    <script type="text/javascript">
+      atOptions = {
+        'key' : '8b6c610485bdd20bf93716ef17e0b0c7',
+        'format' : 'iframe',
+        'height' : 300,
+        'width' : 160,
+        'params' : {}
       };
-
-      db.ref("currentClass").set(classData)
-        .then(() => {
-          statusMsg.innerText = "✅ Class scheduled successfully!";
-        })
-        .catch((error) => {
-          console.error("Firebase Error:", error);
-          alert("Something went wrong. Check the console for details.");
-        });
-    });
-  </script>
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/8b6c610485bdd20bf93716ef17e0b0c7/invoke.js"></script>
+  </div>
 </body>
 </html>
