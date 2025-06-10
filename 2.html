@@ -1,15 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <!-- ✅ Google AdSense Meta Tag -->
-  <meta name="google-adsense-account" content="ca-pub-6353376980503200">
-
-  <title>My Website</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Fullscreen Video Player</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      touch-action: none;
+    }
+    body.fullscreen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .player {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      background: #000;
+    }
+    .center-controls {
+      position: absolute;
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .control-button {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .side-panel {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      z-index: 1;
+    }
+    .left-panel {
+      left: 0;
+    }
+    .right-panel {
+      right: 0;
+    }
+    .volume-bar, .brightness-bar {
+      writing-mode: bt-lr;
+      transform: rotate(270deg);
+      margin: 20px 0;
+    }
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .progress {
+      height: 100%;
+      background: #fff;
+      width: 0;
+    }
+    .time {
+      position: absolute;
+      bottom: 10px;
+      left: 70px;
+      color: white;
+      font-size: 14px;
+    }
+    .logo {
+      position: absolute;
+      bottom: 10px;
+      right: 70px;
+      height: 30px;
+      opacity: 0.6;
+    }
+  </style>
 </head>
 <body>
-  <h1>Welcome to My Website</h1>
+<div class="player" id="player">
+  <video id="video">
+    <source id="videoSource" src="" type="video/mp4">
+  </video>
+
+  <div class="side-panel left-panel">
+    <button class="control-button" onclick="goBack()">&#8592;</button>
+    <input type="range" class="brightness-bar" min="0.2" max="1" step="0.01" value="1" onchange="changeBrightness(this.value)">
+    <div class="time" id="currentTime">00:00 / 00:00</div>
+  </div>
+
+  <div class="center-controls">
+    <div class="control-button" onclick="rewind()">&#8630;10</div>
+    <div class="control-button" onclick="togglePlay()">&#9658;</div>
+    <div class="control-button" onclick="forward()">10&#8631;</div>
+  </div>
+
+  <div class="side-panel right-panel">
+    <button class="control-button">&#9881;</button>
+    <input type="range" class="volume-bar" min="0" max="1" step="0.01" value="1" onchange="changeVolume(this.value)">
+    <button class="control-button" onclick="toggleFullscreen()">&#x26F6;</button>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress" id="progress"></div>
+  </div>
+  <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/4/45/Doubtnut_logo.png" alt="Logo">
+</div>
+
+<script>
+  const video = document.getElementById("video");
+  const videoSource = document.getElementById("videoSource");
+  const progress = document.getElementById("progress");
+  const currentTimeDisplay = document.getElementById("currentTime");
+  const player = document.getElementById("player");
+
+  const urlParam = new URLSearchParams(window.location.search).get('');
+  if (urlParam) {
+    videoSource.src = decodeURIComponent(urlParam);
+    video.load();
+  } else {
+    alert("No video URL provided");
+  }
+
+  function togglePlay() {
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  }
+
+  function rewind() {
+    video.currentTime -= 10;
+  }
+
+  function forward() {
+    video.currentTime += 10;
+  }
+
+  function goBack() {
+    window.history.back();
+  }
+
+  function changeVolume(val) {
+    video.volume = val;
+  }
+
+  function changeBrightness(val) {
+    video.style.filter = `brightness(${val})`;
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      player.requestFullscreen().catch(err => console.error(err));
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  function formatTime(t) {
+    const m = Math.floor(t / 60).toString().padStart(2, '0');
+    const s = Math.floor(t % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  video.addEventListener('timeupdate', () => {
+    const percent = (video.currentTime / video.duration) * 100;
+    progress.style.width = percent + '%';
+    currentTimeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+  });
+
+  // Force fullscreen and landscape mode
+  window.addEventListener('load', () => {
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(() => {});
+    }
+    player.requestFullscreen().catch(() => {});
+  });
+</script>
 </body>
 </html>
