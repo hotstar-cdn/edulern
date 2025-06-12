@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    div { margin-bottom: 10px; }
+    button { padding: 5px 10px; }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBfWTRzQade4aMbmjSt50FeTLkYwR8xgOk",
+      authDomain: "edulearn-auth.firebaseapp.com",
+      projectId: "edulearn-auth",
+      storageBucket: "edulearn-auth.firebasestorage.app",
+      messagingSenderId: "948379570707",
+      appId: "1:948379570707:web:14fba7eb97d7ed9a58e5e6",
+      measurementId: "G-DTZYVT7CEX"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const listDiv = document.createElement("div");
+    document.body.appendChild(listDiv);
+
+    const q = await getDocs(collection(db, "users"));
+    q.forEach((snap) => {
+      const data = snap.data();
+      if (data.type === "student" && !data.verified) {
+        const div = document.createElement("div");
+        div.innerHTML = `${data.name} - Class ${data.class} <button onclick="approve('${snap.id}')">Approve</button>`;
+        listDiv.appendChild(div);
+      }
+    });
+
+    window.approve = async (uid) => {
+      await updateDoc(doc(db, "users", uid), { verified: true });
+      alert("Student approved!");
+      location.reload();
+    };
+  </script>
+</head>
+<body>
+  <h2>Admin Panel - Approve Students</h2>
+</body>
+</html>
