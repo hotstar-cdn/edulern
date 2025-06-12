@@ -3,40 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Adsterra Ad Example</title>
+  <title>Firebase Video Call</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #121212;
+      color: white;
+    }
+    #videos {
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: Arial, sans-serif;
+      gap: 10px;
+      margin: 20px;
+      flex-wrap: wrap;
     }
-
-    .ad-container {
-      border: 2px dashed #aaa;
-      background: #fff;
+    video {
+      width: 300px;
+      height: 200px;
+      border: 2px solid #00f7ff;
+      border-radius: 10px;
+      background: black;
+    }
+    button, input {
+      margin: 5px;
       padding: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
+    input {
+      width: 200px;
     }
   </style>
 </head>
 <body>
-  <div class="ad-container">
-    <!-- Adsterra Ad Code -->
-    <script type="text/javascript">
-      atOptions = {
-        'key' : '8b6c610485bdd20bf93716ef17e0b0c7',
-        'format' : 'iframe',
-        'height' : 300,
-        'width' : 160,
-        'params' : {}
-      };
-    </script>
-    <script type="text/javascript" src="//www.highperformanceformat.com/8b6c610485bdd20bf93716ef17e0b0c7/invoke.js"></script>
+  <h2>Real-Time Video Call</h2>
+  <div id="videos">
+    <video id="localVideo" autoplay muted></video>
+    <video id="remoteVideo" autoplay></video>
   </div>
+  <div>
+    <button id="createCall">Create Call</button>
+    <input type="text" id="callInput" placeholder="Enter Call ID" />
+    <button id="joinCall">Join Call</button>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4CNxWmVzr8O7NuiPZSysUzNHLPS_64_A",
+      authDomain: "video-calls-a9f6d.firebaseapp.com",
+      databaseURL: "https://video-calls-a9f6d-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "video-calls-a9f6d",
+      storageBucket: "video-calls-a9f6d.firebasestorage.app",
+      messagingSenderId: "126711865660",
+      appId: "1:126711865660:web:39f219e2ecf5d521817e39",
+      measurementId: "G-FMS6BTWFD0"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    firebase.auth().signInAnonymously();
+
+    const servers = {
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    };
+
+    let localStream, remoteStream, peerConnection;
+
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+
+    document.getElementById('createCall').onclick = async () => {
+      const callId = prompt("Enter Call ID to create:");
+      const callRef = db.ref(`calls/${callId}`);
+      peerConnection = new RTCPeerConnection(servers);
+
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      remoteStream = new MediaStream();
+
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+      peerConnection.ontrack = event => {
+        event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+      };
+
+      localVideo.srcObject = localStream;
+      remoteVideo.srcObject = remoteStream;
+
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      callRef.set({ offer });
+
+      callRef.on('value', async snapshot => {
+        const data = snapshot.val();
+        if (!peerConnection.currentRemoteDescription && data?.answer) {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        }
+        if (data?.iceCandidateRemote) {
+          peerConnection.addIceCandidate(new RTCIceCandidate(data.iceCandidateRemote));
+        }
+      });
+
+      peerConnection.onicecandidate = event => {
+        if (event.candidate) {
+          callRef.update({ iceCandidateLocal: event.candidate.toJSON() });
+        }
+      };
+    };
+
+    document.getElementById('joinCall').onclick = async () => {
+      const callId = document.getElementById('callInput').value.trim();
+      const callRef = db.ref(`calls/${callId}`);
+      peerConnection = new RTCPeerConnection(servers);
+
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      remoteStream = new MediaStream();
+
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+      peerConnection.ontrack = event => {
+        event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+      };
+
+      localVideo.srcObject = localStream;
+      remoteVideo.srcObject = remoteStream;
+
+      const snapshot = await callRef.once('value');
+      const data = snapshot.val();
+
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+      callRef.update({ answer });
+
+      callRef.on('value', snapshot => {
+        const data = snapshot.val();
+        if (data?.iceCandidateLocal) {
+          peerConnection.addIceCandidate(new RTCIceCandidate(data.iceCandidateLocal));
+        }
+      });
+
+      peerConnection.onicecandidate = event => {
+        if (event.candidate) {
+          callRef.update({ iceCandidateRemote: event.candidate.toJSON() });
+        }
+      };
+    };
+  </script>
 </body>
 </html>
