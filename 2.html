@@ -1,193 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Community Talk</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet"/>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0; padding: 0;
-      background: #f0f2f5; color: #333;
-      display: flex; flex-direction: column;
-      height: 100vh;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; background: #ece5dd; }
+    /* Header */
     header {
-      background: #6200ea; color: white;
-      padding: 12px; text-align: center;
-      font-weight: bold;
+      height: 60px; background: #075e54; display: flex;
+      align-items: center; padding: 0 10px; color: white;
     }
-    #chat {
-      flex: 1; overflow-y: auto;
-      padding: 10px;
-    }
+    header .back { font-size: 20px; margin-right: 15px; cursor: pointer; }
+    header .chat-title { flex: 1; font-size: 18px; }
+    header .status { font-size: 12px; }
+    /* Chat Area */
+    #chat { flex: 1; padding: 10px; overflow-y: auto; }
     .bubble {
-      max-width: 70%;
-      padding: 10px;
-      margin: 8px;
-      border-radius: 10px;
-      word-wrap: break-word;
+      max-width: 80%; margin: 5px 0; padding: 8px 12px;
+      border-radius: 7.5px; position: relative; word-wrap: break-word;
     }
-    .sent { background: #dcf8c6; margin-left: auto; }
-    .received { background: #fff; margin-right: auto; }
-    .bubble img {
-      max-width: 100%; margin-top: 5px; border-radius: 6px;
+    .sent { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 0; }
+    .received { background: #fff; align-self: flex-start; border-bottom-left-radius: 0; }
+    .bubble img { max-width: 100%; border-radius: 5px; margin-top: 5px; }
+    .meta { font-size: 10px; color: #555; margin-top: 3px; text-align: right; }
+    .seen { font-size: 9px; color: #777; margin-top: 3px; text-align: right; }
+    /* Input */
+    .input-bar {
+      background: #fff; padding: 5px 10px; display: flex; align-items: center;
+      position: relative;
     }
-    .meta {
-      font-size: 10px; text-align: right; color: #777;
+    .input-bar input[type="text"] {
+      flex: 1; padding: 8px; border-radius: 20px; border: none;
+      background: #f0f0f0; margin: 0 10px;
     }
-    #input-area {
-      display: flex; padding: 10px;
-      background: #fff; border-top: 1px solid #ccc;
+    .input-bar input[type="file"] { display: none; }
+    .input-bar .attach {
+      font-size: 20px; color: #075e54; cursor: pointer;
     }
-    #msg, #file {
-      padding: 10px;
-      font-size: 16px;
+    .input-bar .send-btn {
+      position: absolute; right: 15px; background: #25d366; color: white;
+      border: none; padding: 8px; border-radius: 50%; font-size: 18px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
-    #msg {
-      flex: 1;
-      border: 1px solid #ccc; border-radius: 4px;
-    }
-    #file {
-      margin-left: 5px;
-    }
-    #sendBtn {
-      margin-left: 5px;
-      background: #6200ea; color: white;
-      border: none; padding: 10px 15px;
-      border-radius: 5px;
-    }
+    /* Username Modal */
     #usernameModal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex; align-items: center; justify-content: center;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; justify-content: center; align-items: center;
     }
     #usernameBox {
-      background: white; padding: 30px;
-      border-radius: 10px;
+      background: white; padding: 20px; border-radius: 10px;
+      width: 90%; max-width: 300px; text-align: center;
     }
-    @media(max-width: 600px) {
+    /* Reaction Picker */
+    #reactPicker {
+      position: absolute; background: #fff; border: 1px solid #ccc;
+      border-radius: 10px; padding: 5px; display: none;
+    }
+    #reactPicker span { font-size: 24px; margin: 2px; cursor: pointer; }
+
+    @media(max-width:600px){
+      header { padding: 0 5px; }
       .bubble { max-width: 90%; }
-      #msg { font-size: 14px; }
+      .input-bar .send-btn { right: 10px; padding: 6px; }
     }
   </style>
 </head>
 <body>
-  <header>Community Talk</header>
+  <header>
+    <div class="back">&#8592;</div>
+    <div class="chat-title">Community Talk</div>
+    <div class="status">Loading...</div>
+  </header>
 
   <div id="chat"></div>
 
-  <div id="input-area">
-    <input type="text" id="msg" placeholder="Type a message..." />
+  <div class="input-bar">
+    <label class="attach" for="file">&#128247;</label>
     <input type="file" id="file" accept="image/*" />
-    <button id="sendBtn">Send</button>
+    <input type="text" id="msg" placeholder="Type a message" />
+    <button class="send-btn" id="sendBtn">&#9658;</button>
   </div>
 
   <div id="usernameModal">
     <div id="usernameBox">
       <h3>Enter your name</h3>
-      <input type="text" id="usernameInput" />
-      <br /><br />
+      <input type="text" id="usernameInput"/>
+      <br/><br/>
       <button onclick="saveUsername()">Start</button>
     </div>
   </div>
 
+  <div id="reactPicker"><span>👍</span><span>❤️</span><span>😂</span><span>😮</span></div>
   <audio id="ping" src="https://notificationsounds.com/storage/sounds/file-sounds-1154-pristine.mp3" preload="auto"></audio>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-
   <script>
-    // Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
-      authDomain: "community-edulearn.firebaseapp.com",
-      projectId: "community-edulearn",
-      storageBucket: "community-edulearn.firebasestorage.app",
-      messagingSenderId: "517780625337",
-      appId: "1:517780625337:web:b4d491cfe8057aa0dd4868",
-      measurementId: "G-7T47TFT2ZX"
+    const config = {
+      apiKey:"AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
+      authDomain:"community-edulearn.firebaseapp.com",
+      projectId:"community-edulearn",
+      storageBucket:"community-edulearn.firebasestorage.app",
+      messagingSenderId:"517780625337",
+      appId:"1:517780625337:web:b4d491cfe8057aa0dd4868",
+      measurementId:"G-7T47TFT2ZX"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+    firebase.initializeApp(config);
+    const db = firebase.firestore(), storage = firebase.storage();
+    let username = localStorage.getItem('ctUser');
+    const chat = document.getElementById('chat'), statusDiv = document.querySelector('.status');
 
-    let username = localStorage.getItem('username');
-    const chatBox = document.getElementById("chat");
-    const usernameModal = document.getElementById("usernameModal");
+    if(!username){
+      document.getElementById('usernameModal').style.display='flex';
+    } else init();
 
-    if (!username) {
-      usernameModal.style.display = "flex";
-    } else {
-      usernameModal.style.display = "none";
-      listenForMessages();
+    function saveUsername(){
+      const v = document.getElementById('usernameInput').value.trim();
+      if(!v) return;
+      username = v;
+      localStorage.setItem('ctUser',v);
+      db.collection('presence').doc(username).set({online:true});
+      document.getElementById('usernameModal').style.display='none';
+      init();
     }
 
-    function saveUsername() {
-      const input = document.getElementById("usernameInput");
-      const name = input.value.trim();
-      if (name.length > 0) {
-        localStorage.setItem('username', name);
-        username = name;
-        usernameModal.style.display = "none";
-        listenForMessages();
-      }
+    window.addEventListener('beforeunload',()=> db.collection('presence').doc(username).update({online:false}));
+
+    function init(){
+      document.getElementById('sendBtn').onclick = sendMsg;
+      document.getElementById('msg').onkeydown = e => { if(e.key==='Enter') sendMsg(); };
+      listenChats(); listenPresence();
+      chat.addEventListener('click', msgClicked);
     }
 
-    document.getElementById("sendBtn").addEventListener("click", sendMessage);
-    async function sendMessage() {
-      const text = document.getElementById("msg").value.trim();
-      const file = document.getElementById("file").files[0];
-
-      if (!text && !file) return;
-
-      let imgUrl = '';
-      if (file) {
-        const storageRef = storage.ref('images/' + Date.now() + '_' + file.name);
-        await storageRef.put(file);
-        imgUrl = await storageRef.getDownloadURL();
+    async function sendMsg(){
+      const text = document.getElementById('msg').value.trim();
+      const file = document.getElementById('file').files[0];
+      let img='';
+      if(file){
+        let ref = storage.ref('imgs/'+Date.now()+'_'+file.name);
+        await ref.put(file);
+        img = await ref.getDownloadURL();
       }
-
-      await db.collection("messages").add({
-        name: username,
-        text: text,
-        image: imgUrl,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      if(!text && !img) return;
+      await db.collection('chats').add({
+        name:username, text, img,
+        ts: firebase.firestore.FieldValue.serverTimestamp(),
+        seen:[], reactions:{}
       });
-
-      document.getElementById("msg").value = "";
-      document.getElementById("file").value = "";
+      document.getElementById('msg').value='';
+      document.getElementById('file').value='';
     }
 
-    function listenForMessages() {
-      db.collection("messages")
-        .orderBy("timestamp")
-        .onSnapshot(snapshot => {
-          chatBox.innerHTML = '';
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const div = document.createElement("div");
-            div.classList.add("bubble");
-            div.classList.add(data.name === username ? "sent" : "received");
-
-            const avatar = `<b>${data.name}</b><br/>`;
-            const text = data.text ? `<div>${data.text}</div>` : "";
-            const img = data.image ? `<img src="${data.image}" />` : "";
-            const time = `<div class="meta">${new Date(data.timestamp?.toDate()).toLocaleTimeString()}</div>`;
-
-            div.innerHTML = avatar + text + img + time;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-          });
-
-          document.getElementById("ping").play();
+    function listenChats(){
+      db.collection('chats').orderBy('ts')
+        .onSnapshot(snap=>{
+          chat.innerHTML='';
+          snap.forEach(d=> renderMsg(d.id,d.data()));
+          chat.scrollTop = chat.scrollHeight;
+          document.getElementById('ping').play();
         });
+    }
+
+    function renderMsg(id,d){
+      const b = document.createElement('div');
+      b.className = 'bubble '+(d.name===username?'sent':'received');
+      b.dataset.id = id;
+      let html = `<b>${d.name}</b><br>`;
+      if(d.text) html += `<div>${d.text}</div>`;
+      if(d.img) html += `<img src="${d.img}"/>`;
+      html += `<div class="meta">${new Date(d.ts?.toDate()).toLocaleTimeString()}</div>`;
+      if(d.seen?.length) html += `<div class="seen">Seen: ${d.seen.join(', ')}</div>`;
+      b.innerHTML = html;
+      chat.appendChild(b);
+      if(!d.seen?.includes(username)){
+        db.collection('chats').doc(id).update({seen:firebase.firestore.FieldValue.arrayUnion(username)});
+      }
+    }
+
+    const picker = document.getElementById('reactPicker');
+    function msgClicked(e){
+      const msgDiv = e.target.closest('.bubble');
+      if(!msgDiv) return;
+      const id = msgDiv.dataset.id;
+      picker.style.display = 'flex';
+      picker.style.left = e.pageX + 'px';
+      picker.style.top = e.pageY + 'px';
+      picker.onclick = ev => {
+        if(ev.target.tagName==='SPAN'){
+          db.collection('chats').doc(id)
+            .update({[`reactions.${username}`]:ev.target.innerText});
+        }
+        picker.style.display = 'none';
+      };
+    }
+
+    function listenPresence(){
+      db.collection('presence').onSnapshot(snap=>{
+        const online = [];
+        snap.forEach(d=> { if(d.data().online) online.push(d.id); });
+        statusDiv.innerText = 'Online: ' + online.join(', ');
+      });
     }
   </script>
 </body>
