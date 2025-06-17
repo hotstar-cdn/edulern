@@ -1,183 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Community Talk</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      margin: 0;
-      padding: 0;
-    }
-    #chat-box {
-      max-width: 600px;
-      margin: 20px auto;
-      background: white;
-      padding: 10px;
-      height: 70vh;
-      overflow-y: scroll;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .message {
-      margin: 10px 0;
-      padding: 10px;
-      background: #e1f5fe;
-      border-radius: 8px;
-    }
-    .message img {
-      max-width: 100%;
-      margin-top: 5px;
-      border-radius: 5px;
-    }
-    #input-area {
-      max-width: 600px;
-      margin: 0 auto;
-      display: flex;
-      gap: 10px;
-      padding: 10px;
-    }
-    input[type="text"], input[type="file"] {
-      flex: 1;
-      padding: 8px;
-      font-size: 16px;
-    }
-    button {
-      padding: 8px 16px;
-      background: #0288d1;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #username-prompt {
-      position: fixed;
-      top: 0; left: 0;
-      right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #username-prompt input {
-      padding: 10px;
-      font-size: 18px;
-    }
-    #username-box {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      text-align: center;
-    }
+    body { font-family: sans-serif; background: #ece5dd; margin: 0; height: 100vh; display: flex; flex-direction: column; }
+    header { background: #075e54; color: white; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+    #chat { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
+    .bubble { padding: 10px; margin: 5px; border-radius: 10px; max-width: 70%; }
+    .sent { align-self: flex-end; background: #dcf8c6; }
+    .received { align-self: flex-start; background: #fff; }
+    .input-bar { display: flex; padding: 10px; background: #fff; }
+    .input-bar input[type="text"] { flex: 1; border: none; border-radius: 20px; padding: 10px; background: #f0f0f0; }
+    .input-bar button { margin-left: 10px; background: #25d366; border: none; border-radius: 50%; width: 40px; height: 40px; color: white; font-size: 18px; }
+    #usernameModal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; }
+    #usernameBox { background: white; padding: 20px; border-radius: 10px; text-align: center; }
   </style>
 </head>
 <body>
+  <header>
+    <div>Community Talk</div>
+    <div id="status">Connecting...</div>
+  </header>
 
-<div id="username-prompt" style="display: none;">
-  <div id="username-box">
-    <h2>Enter your name</h2>
-    <input type="text" id="username-input" placeholder="Your name" />
-    <br><br>
-    <button onclick="setUsername()">Continue</button>
+  <div id="chat"></div>
+
+  <div class="input-bar">
+    <input type="file" id="file" accept="image/*">
+    <input type="text" id="msg" placeholder="Type a message..." />
+    <button id="sendBtn">&#9658;</button>
   </div>
-</div>
 
-<div id="chat-box"></div>
+  <div id="usernameModal">
+    <div id="usernameBox">
+      <h3>Enter your name</h3>
+      <input type="text" id="usernameInput" />
+      <br><br>
+      <button onclick="saveUsername()">Start</button>
+    </div>
+  </div>
 
-<div id="input-area">
-  <input type="text" id="message-input" placeholder="Type a message..." />
-  <input type="file" id="image-input" accept="image/*" />
-  <button onclick="sendMessage()">Send</button>
-</div>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
+      authDomain: "community-edulearn.firebaseapp.com",
+      projectId: "community-edulearn",
+      storageBucket: "community-edulearn.firebasestorage.app",
+      messagingSenderId: "517780625337",
+      appId: "1:517780625337:web:b4d491cfe8057aa0dd4868",
+      measurementId: "G-7T47TFT2ZX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    const messaging = firebase.messaging();
 
-<script>
-  // Your Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
-    authDomain: "community-edulearn.firebaseapp.com",
-    projectId: "community-edulearn",
-    storageBucket: "community-edulearn.appspot.com",
-    messagingSenderId: "517780625337",
-    appId: "1:517780625337:web:b4d491cfe8057aa0dd4868",
-    measurementId: "G-7T47TFT2ZX"
-  };
-  
-  // Init Firebase
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const storage = firebase.storage();
+    let username = localStorage.getItem('ctUser');
+    const chat = document.getElementById('chat');
 
-  let username = localStorage.getItem('community_username');
-  const usernamePrompt = document.getElementById('username-prompt');
-
-  if (!username) {
-    usernamePrompt.style.display = 'flex';
-  }
-
-  function setUsername() {
-    const input = document.getElementById('username-input').value.trim();
-    if (input) {
-      username = input;
-      localStorage.setItem('community_username', username);
-      db.collection("users").doc(username).set({ name: username }); // Save username to Firestore
-      usernamePrompt.style.display = 'none';
-    }
-  }
-
-  async function sendMessage() {
-    const messageInput = document.getElementById("message-input");
-    const imageInput = document.getElementById("image-input");
-    const text = messageInput.value.trim();
-    const imageFile = imageInput.files[0];
-
-    let imageUrl = null;
-
-    if (imageFile) {
-      const imgRef = storage.ref("images/" + Date.now() + "_" + imageFile.name);
-      await imgRef.put(imageFile);
-      imageUrl = await imgRef.getDownloadURL();
+    if (!username) {
+      document.getElementById('usernameModal').style.display = 'flex';
+    } else {
+      db.collection('users').doc(username).get().then(doc => {
+        if (doc.exists) init();
+        else {
+          localStorage.removeItem('ctUser');
+          location.reload();
+        }
+      });
     }
 
-    if (text || imageUrl) {
-      db.collection("chats").add({
-        username,
-        text,
-        imageUrl,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    function saveUsername() {
+      const v = document.getElementById('usernameInput').value.trim();
+      if (!v) return;
+      username = v;
+      localStorage.setItem('ctUser', v);
+      db.collection('users').doc(v).set({
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        online: true
+      });
+      document.getElementById('usernameModal').style.display = 'none';
+      init();
+    }
+
+    async function init() {
+      document.getElementById('sendBtn').onclick = sendMsg;
+      document.getElementById('msg').onkeydown = e => { if (e.key === 'Enter') sendMsg(); };
+      db.collection('users').doc(username).update({ online: true });
+
+      // Notifications
+      try {
+        await messaging.requestPermission();
+        const token = await messaging.getToken({ vapidKey: "YOUR_PUBLIC_VAPID_KEY" }); // Replace!
+        await db.collection('users').doc(username).update({ fcmToken: token });
+        console.log("FCM Token saved:", token);
+      } catch (err) {
+        console.warn("Push notification blocked or failed", err);
+      }
+
+      messaging.onMessage(payload => {
+        if (payload.notification && document.hidden) {
+          new Notification(payload.notification.title, {
+            body: payload.notification.body,
+            icon: '/chat-icon.png'
+          });
+        }
       });
 
-      messageInput.value = "";
-      imageInput.value = "";
+      listenChats();
+      listenOnlineUsers();
     }
-  }
 
-  function renderMessage(doc) {
-    const data = doc.data();
-    const msgDiv = document.createElement("div");
-    msgDiv.className = "message";
-    msgDiv.innerHTML = `<strong>${data.username}</strong><br>${data.text || ''}`;
-    if (data.imageUrl) {
-      msgDiv.innerHTML += `<br><img src="${data.imageUrl}" alt="image" />`;
+    async function sendMsg() {
+      const text = document.getElementById('msg').value.trim();
+      const file = document.getElementById('file').files[0];
+      let img = '';
+      if (file) {
+        const ref = storage.ref('imgs/' + Date.now() + '_' + file.name);
+        await ref.put(file);
+        img = await ref.getDownloadURL();
+      }
+      if (!text && !img) return;
+      await db.collection('chats').add({
+        name: username,
+        text,
+        img,
+        ts: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Send notification to all users (except self)
+      const usersSnap = await db.collection('users').get();
+      usersSnap.forEach(u => {
+        const d = u.data();
+        if (d.fcmToken && u.id !== username) {
+          fetch('https://fcm.googleapis.com/fcm/send', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'key=YOUR_SERVER_KEY', // Replace with your Firebase server key
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              to: d.fcmToken,
+              notification: {
+                title: `${username}`,
+                body: text || "📷 Image sent"
+              }
+            })
+          });
+        }
+      });
+
+      document.getElementById('msg').value = '';
+      document.getElementById('file').value = '';
     }
-    document.getElementById("chat-box").appendChild(msgDiv);
-  }
 
-  // Real-time listener
-  db.collection("chats").orderBy("timestamp")
-    .onSnapshot(snapshot => {
-      const chatBox = document.getElementById("chat-box");
-      chatBox.innerHTML = "";
-      snapshot.forEach(doc => renderMessage(doc));
-      chatBox.scrollTop = chatBox.scrollHeight;
+    function listenChats() {
+      db.collection('chats').orderBy('ts').onSnapshot(snap => {
+        chat.innerHTML = '';
+        snap.forEach(doc => {
+          const d = doc.data();
+          const b = document.createElement('div');
+          b.className = 'bubble ' + (d.name === username ? 'sent' : 'received');
+          let html = `<b>${d.name}</b><br>`;
+          if (d.text) html += d.text + '<br>';
+          if (d.img) html += `<img src="${d.img}"/><br>`;
+          b.innerHTML = html;
+          chat.appendChild(b);
+        });
+        chat.scrollTop = chat.scrollHeight;
+      });
+    }
+
+    function listenOnlineUsers() {
+      db.collection('users').onSnapshot(snap => {
+        let online = [];
+        snap.forEach(doc => {
+          if (doc.data().online) online.push(doc.id);
+        });
+        document.getElementById('status').innerText = 'Online: ' + online.join(', ');
+      });
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (username) db.collection('users').doc(username).update({ online: false });
     });
-</script>
-
+  </script>
 </body>
 </html>
