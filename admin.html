@@ -1,50 +1,170 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Admin Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduLearn Chat</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    div { margin-bottom: 10px; }
-    button { padding: 5px 10px; }
+    body { margin: 0; font-family: sans-serif; background: #f0f2f5; }
+    #login, #chatApp { display: none; padding: 20px; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; border-radius: 8px; border: 1px solid #ccc; }
+    .chat-box { height: 300px; overflow-y: scroll; border: 1px solid #ddd; background: #fff; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+    .msg { margin: 5px 0; padding: 8px; border-radius: 10px; max-width: 70%; }
+    .msg.sent { background: #dcf8c6; align-self: flex-end; }
+    .msg.received { background: #fff; border: 1px solid #ddd; }
+    .contacts { max-height: 150px; overflow-y: auto; margin-bottom: 10px; }
+    .contact { background: #e4e6eb; padding: 8px; margin: 5px 0; cursor: pointer; border-radius: 6px; }
+    #chatArea { display: flex; flex-direction: column; gap: 10px; }
+    @media(max-width: 600px) {
+      .chat-box { height: 50vh; }
+    }
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBfWTRzQade4aMbmjSt50FeTLkYwR8xgOk",
-      authDomain: "edulearn-auth.firebaseapp.com",
-      projectId: "edulearn-auth",
-      storageBucket: "edulearn-auth.firebasestorage.app",
-      messagingSenderId: "948379570707",
-      appId: "1:948379570707:web:14fba7eb97d7ed9a58e5e6",
-      measurementId: "G-DTZYVT7CEX"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const listDiv = document.createElement("div");
-    document.body.appendChild(listDiv);
-
-    const q = await getDocs(collection(db, "users"));
-    q.forEach((snap) => {
-      const data = snap.data();
-      if (data.type === "student" && !data.verified) {
-        const div = document.createElement("div");
-        div.innerHTML = `${data.name} - Class ${data.class} <button onclick="approve('${snap.id}')">Approve</button>`;
-        listDiv.appendChild(div);
-      }
-    });
-
-    window.approve = async (uid) => {
-      await updateDoc(doc(db, "users", uid), { verified: true });
-      alert("Student approved!");
-      location.reload();
-    };
-  </script>
 </head>
 <body>
-  <h2>Admin Panel - Approve Students</h2>
+
+<div id="login">
+  <h2>Login / Signup</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="login()">Login / Signup</button>
+</div>
+
+<div id="chatApp">
+  <h3 id="welcome"></h3>
+  <input type="text" id="searchEmail" placeholder="Search user by email to chat..." />
+  <button onclick="startChat()">Start Chat</button>
+  <div class="contacts" id="contactList"></div>
+
+  <h4 id="chatWith"></h4>
+  <div id="chatArea">
+    <div class="chat-box" id="chatBox"></div>
+    <input type="text" id="message" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
+    authDomain: "community-edulearn.firebaseapp.com",
+    projectId: "community-edulearn",
+    storageBucket: "community-edulearn.firebasestorage.app",
+    messagingSenderId: "517780625337",
+    appId: "1:517780625337:web:b4d491cfe8057aa0dd4868",
+    measurementId: "G-7T47TFT2ZX"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  let currentUser = null;
+  let chattingWith = null;
+
+  function login() {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(() => auth.createUserWithEmailAndPassword(email, password))
+      .then(userCredential => {
+        currentUser = userCredential.user;
+        showChat();
+      });
+  }
+
+  function showChat() {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("chatApp").style.display = "block";
+    document.getElementById("welcome").innerText = `Welcome, ${currentUser.email}`;
+    loadContacts();
+  }
+
+  function startChat() {
+    const email = searchEmail.value.trim().toLowerCase();
+    if (email && email !== currentUser.email) {
+      chattingWith = email.replace('.', '_');
+      document.getElementById("chatWith").innerText = `Chat with: ${email}`;
+      loadMessages();
+      addToContacts(email);
+    }
+  }
+
+  function sendMessage() {
+    const msg = message.value.trim();
+    if (msg && chattingWith) {
+      const chatId = getChatId(currentUser.email, chattingWith);
+      db.ref("chats/" + chatId).push({
+        from: currentUser.email,
+        to: chattingWith,
+        text: msg,
+        timestamp: Date.now()
+      });
+      message.value = "";
+    }
+  }
+
+  function loadMessages() {
+    const chatId = getChatId(currentUser.email, chattingWith);
+    const chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML = "";
+    db.ref("chats/" + chatId).on("value", snap => {
+      chatBox.innerHTML = "";
+      snap.forEach(data => {
+        const msg = data.val();
+        const div = document.createElement("div");
+        div.classList.add("msg", msg.from === currentUser.email ? "sent" : "received");
+        div.innerText = msg.text;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    });
+  }
+
+  function getChatId(email1, email2) {
+    return [email1.replace('.', '_'), email2.replace('.', '_')].sort().join("_");
+  }
+
+  function addToContacts(email) {
+    const contactKey = email.replace('.', '_');
+    db.ref("contacts/" + currentUser.email.replace('.', '_') + "/" + contactKey).set(true);
+    loadContacts();
+  }
+
+  function loadContacts() {
+    const userKey = currentUser.email.replace('.', '_');
+    const contactList = document.getElementById("contactList");
+    db.ref("contacts/" + userKey).on("value", snap => {
+      contactList.innerHTML = "";
+      snap.forEach(data => {
+        const emailKey = data.key.replace('_', '.');
+        const contact = document.createElement("div");
+        contact.classList.add("contact");
+        contact.innerText = emailKey;
+        contact.onclick = () => {
+          searchEmail.value = emailKey;
+          startChat();
+        };
+        contactList.appendChild(contact);
+      });
+    });
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      currentUser = user;
+      showChat();
+    } else {
+      document.getElementById("login").style.display = "block";
+    }
+  });
+
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+</script>
+
 </body>
 </html>
