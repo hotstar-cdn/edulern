@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Auto Redirect to Meet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+    }
+    .msg {
+      text-align: center;
+      font-size: 24px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="msg">
+    You will be redirected to Google Meet in <span id="count">5</span> seconds...
+  </div>
+
+  <script>
+    let count = 5;
+    const countdown = document.getElementById("count");
+
+    const timer = setInterval(() => {
+      count--;
+      countdown.textContent = count;
+      if (count === 0) {
+        clearInterval(timer);
+        // Attempt to open in a new tab (may be blocked by browser)
+        window.open("https://meet.google.com/pdr-gkyz-zpy", "_blank");
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
