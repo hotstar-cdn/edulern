@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Teacher Panel</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { padding: 10px; margin: 10px 0; display: block; width: 100%; }
+  </style>
+</head>
+<body>
+  <h2>Schedule a Class</h2>
+  <input type="datetime-local" id="scheduleTime" />
+  <button onclick="scheduleClass()">Schedule Class</button>
+
+  <h2>OR</h2>
+  <button onclick="startInstantClass()">Start Instant Class</button>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
+      authDomain: "community-edulearn.firebaseapp.com",
+      projectId: "community-edulearn",
+      storageBucket: "community-edulearn.firebasestorage.app",
+      messagingSenderId: "517780625337",
+      appId: "1:517780625337:web:b4d491cfe8057aa0dd4868",
+      measurementId: "G-7T47TFT2ZX"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function scheduleClass() {
+      const time = document.getElementById('scheduleTime').value;
+      if (!time) return alert("Please select date and time");
+
+      db.collection("classes").doc("latest").set({
+        status: "scheduled",
+        time: new Date(time).toISOString()
+      }).then(() => {
+        alert("Class scheduled successfully!");
+      });
+    }
+
+    function startInstantClass() {
+      db.collection("classes").doc("latest").set({
+        status: "instant",
+        time: new Date().toISOString()
+      }).then(() => {
+        alert("Instant class started!");
+      });
+    }
+  </script>
+</body>
+</html>
