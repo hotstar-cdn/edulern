@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Redirecting...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+    }
+    .message {
+      text-align: center;
+      font-size: 24px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="message">
+    Redirecting to your meeting in <span id="timer">5</span> seconds...
+  </div>
+
+  <script>
+    let timeLeft = 5;
+    const timer = document.getElementById('timer');
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      timer.textContent = timeLeft;
+      if (timeLeft === 0) {
+        clearInterval(countdown);
+        window.location.href = "https://meet.google.com/pdr-gkyz-zpy"; // same tab
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
