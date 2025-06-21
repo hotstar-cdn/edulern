@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+    .login-container {
+      background: #fff;
+      max-width: 350px;
+      margin: 3em auto;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0 16px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #0072ff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0057b8;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <label for="formNo">Form No.</label>
+      <input type="text" id="formNo" name="formNo" required>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+      <button type="submit">Login</button>
+      <div id="error" class="error"></div>
+    </form>
+  </div>
+  <script src="data.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formNo = document.getElementById('formNo').value.trim();
+      const password = document.getElementById('password').value;
+      const user = users.find(u => u.formNo === formNo && u.password === password);
+      if (!user) {
+        document.getElementById('error').innerText = "Invalid Form No. or Password";
+        return;
+      }
+      // Save user session (for demo, localStorage)
+      localStorage.setItem('loggedInUser', JSON.stringify(user));
+      // Redirection logic
+      if (user.role === 'student') {
+        if (["6", "7", "8", "9", "10"].includes(user.class)) {
+          window.location.href = `https://abc.xyz/${user.class}`;
+        } else {
+          window.location.href = "https://abc.xyz/s";
+        }
+      } else if (user.role === 'teacher') {
+        window.location.href = "https://abc.xyz/t";
+      }
+      // Uncomment below to redirect to profile.html for demo/testing
+      // window.location.href = "profile.html";
+    });
+  </script>
+</body>
+</html>
