@@ -19,9 +19,6 @@
       margin-top: 40px;
       border-radius: 12px;
     }
-    h1, h3 {
-      color: #333;
-    }
     .question {
       border-bottom: 1px solid #ccc;
       padding-bottom: 15px;
@@ -31,12 +28,39 @@
       display: block;
       margin: 5px 0;
     }
+    .correct { background-color: #c8e6c9; }
+    .wrong { background-color: #ffcdd2; }
+    #submitBtn {
+      background-color: #2196F3;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #submitBtn:hover {
+      background-color: #1976D2;
+    }
+    #result {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <div class="container" id="quiz-container"></div>
+  <div class="container" id="quiz-container">
+    <h1>Quiz</h1>
+    <div id="questions"></div>
+    <button id="submitBtn" onclick="submitQuiz()">Submit Quiz</button>
+    <div id="result"></div>
+  </div>
   <script src="data.js"></script>
   <script>
+    let selectedAnswers = {};
+    let correctAnswers = [];
+
     function loadQuiz() {
       const params = new URLSearchParams(window.location.search);
       const subject = params.get("subject");
@@ -48,18 +72,45 @@
       const allQs = chapterData?.questions || [];
       const filteredQs = allQs.filter(q => q.difficulty === difficulty);
       const shuffled = filteredQs.sort(() => 0.5 - Math.random()).slice(0, count);
+      correctAnswers = shuffled.map(q => q.correct);
 
-      const container = document.getElementById("quiz-container");
+      const container = document.getElementById("questions");
       shuffled.forEach((q, i) => {
         const qBox = document.createElement("div");
         qBox.className = "question";
         qBox.innerHTML = `<h3>Q${i + 1}. ${q.q}</h3>`;
         q.a.forEach((opt, j) => {
-          qBox.innerHTML += `<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label><br>`;
+          qBox.innerHTML += `
+            <label>
+              <input type="radio" name="q${i}" value="${j}" onclick="selectedAnswers[${i}] = ${j}">
+              ${opt}
+            </label>`;
         });
         container.appendChild(qBox);
       });
     }
+
+    function submitQuiz() {
+      const questions = document.querySelectorAll(".question");
+      let score = 0;
+
+      questions.forEach((q, i) => {
+        const selected = selectedAnswers[i];
+        const correct = correctAnswers[i];
+        const radios = q.querySelectorAll("input[type='radio']");
+        radios.forEach((radio, idx) => {
+          const parent = radio.parentElement;
+          parent.classList.remove("correct", "wrong");
+          if (idx === correct) parent.classList.add("correct");
+          if (idx === selected && selected !== correct) parent.classList.add("wrong");
+        });
+        if (selected === correct) score++;
+      });
+
+      document.getElementById("result").innerText = `Your Score: ${score} / ${correctAnswers.length}`;
+      document.getElementById("submitBtn").disabled = true;
+    }
+
     loadQuiz();
   </script>
 </body>
