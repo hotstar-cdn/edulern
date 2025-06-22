@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student View</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script src="firebase.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    video { width: 100%; max-width: 600px; border: 2px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>📺 Live Class</h1>
+  <video id="video" autoplay controls></video>
+
+  <script>
+    const video = document.getElementById('video');
+    const mediaSource = new MediaSource();
+    video.src = URL.createObjectURL(mediaSource);
+
+    let loadedSegments = [];
+
+    mediaSource.addEventListener('sourceopen', () => {
+      const sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs=vp8,opus');
+
+      const loadSegments = async () => {
+        const snapshot = await firebase.firestore()
+          .collection('segments')
+          .orderBy('timestamp')
+          .get();
+
+        for (const doc of snapshot.docs) {
+          const { fileName } = doc.data();
+          if (!loadedSegments.includes(fileName)) {
+            loadedSegments.push(fileName);
+
+            const url = await firebase.storage().ref('segments/' + fileName).getDownloadURL();
+            const res = await fetch(url);
+            const buffer = await res.arrayBuffer();
+
+            sourceBuffer.appendBuffer(buffer);
+          }
+        }
+      };
+
+      // Load every 5 seconds
+      setInterval(loadSegments, 5000);
+    });
+  </script>
+</body>
+</html>
