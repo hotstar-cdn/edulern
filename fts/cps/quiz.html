@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz</title>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f8;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      margin-top: 40px;
+      border-radius: 12px;
+    }
+    h1, h3 {
+      color: #333;
+    }
+    .question {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="quiz-container"></div>
+  <script src="data.js"></script>
+  <script>
+    function loadQuiz() {
+      const params = new URLSearchParams(window.location.search);
+      const subject = params.get("subject");
+      const chapter = params.get("chapter");
+      const difficulty = params.get("difficulty");
+      const count = parseInt(params.get("count"));
+
+      const chapterData = data[subject]?.chapters?.find(c => c.id === chapter);
+      const allQs = chapterData?.questions || [];
+      const filteredQs = allQs.filter(q => q.difficulty === difficulty);
+      const shuffled = filteredQs.sort(() => 0.5 - Math.random()).slice(0, count);
+
+      const container = document.getElementById("quiz-container");
+      shuffled.forEach((q, i) => {
+        const qBox = document.createElement("div");
+        qBox.className = "question";
+        qBox.innerHTML = `<h3>Q${i + 1}. ${q.q}</h3>`;
+        q.a.forEach((opt, j) => {
+          qBox.innerHTML += `<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label><br>`;
+        });
+        container.appendChild(qBox);
+      });
+    }
+    loadQuiz();
+  </script>
+</body>
+</html>
