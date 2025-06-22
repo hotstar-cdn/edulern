@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Homework</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .homework-list {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .card {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-left: 5px solid #3498db;
+    }
+
+    .card-text {
+      max-width: 85%;
+    }
+
+    .title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #2c3e50;
+    }
+
+    .topic {
+      font-size: 0.95rem;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    .meta {
+      font-size: 0.85rem;
+      margin-top: 8px;
+      color: #999;
+    }
+
+    .subject-icon {
+      font-size: 2rem;
+      align-self: center;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e0e0e0;
+      margin: 14px 0;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .card-text {
+        max-width: 100%;
+      }
+
+      .subject-icon {
+        align-self: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center; color:#2c3e50;">📚 Homework Backlog</h2>
+  <div class="homework-list" id="homeworkList">Loading...</div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
+      authDomain: "community-edulearn.firebaseapp.com",
+      projectId: "community-edulearn",
+      storageBucket: "community-edulearn.appspot.com",
+      messagingSenderId: "517780625337",
+      appId: "1:517780625337:web:b4d491cfe8057aa0dd4868"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const subjectIcons = {
+      "Math": "📐",
+      "Science": "🧪",
+      "English": "📖",
+      "History": "🧭",
+      "Geography": "🌍",
+      "Physics": "🔬",
+      "Chemistry": "⚗️",
+      "Biology": "🧬",
+      "Civics": "🏛️",
+      "Computer": "💻"
+    };
+
+    function formatDate(ms) {
+      const date = new Date(ms);
+      return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    }
+
+    function loadHomework() {
+      const container = document.getElementById("homeworkList");
+      db.collection("homework").orderBy("dueTimestamp", "desc").get().then(snapshot => {
+        container.innerHTML = "";
+        snapshot.forEach(doc => {
+          const hw = doc.data();
+          const icon = subjectIcons[hw.subject] || "📘";
+          const due = formatDate(hw.dueTimestamp);
+          const card = `
+            <div class="card">
+              <div class="card-text">
+                <div class="title">${hw.title}</div>
+                <div class="topic">${hw.topic || ''}</div>
+                <div class="meta">${hw.questionCount || '0'} Qs • Due: ${due}</div>
+              </div>
+              <div class="subject-icon">${icon}</div>
+            </div>
+          `;
+          container.innerHTML += card;
+        });
+
+        if (snapshot.empty) {
+          container.innerHTML = "<p style='text-align:center;'>No homework found.</p>";
+        }
+      });
+    }
+
+    loadHomework();
+  </script>
+</body>
+</html>
