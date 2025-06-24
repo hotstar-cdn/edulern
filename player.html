@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Video Player</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .player-container {
+      width: 360px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      color: black;
+    }
+    .header {
+      background-color: #ffe100;
+      padding: 10px;
+      font-weight: bold;
+      font-size: 18px;
+      text-align: center;
+    }
+    .video-wrapper {
+      position: relative;
+      background-color: black;
+    }
+    video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .title {
+      padding: 10px;
+      font-size: 16px;
+      text-align: center;
+    }
+    .branding {
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+<div class="player-container">
+  <div class="header" id="headerTitle">JEE MAIN 2024 Result</div>
+  <div class="video-wrapper">
+    <video id="videoPlayer" controls autoplay></video>
+  </div>
+  <div class="title" id="titleText">Title Here</div>
+  <div class="branding">Powered by ALLEN</div>
+</div>
+
+<script>
+  function getQueryParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
+  }
+
+  const videoURL = getQueryParam('video');
+  const title = getQueryParam('title');
+
+  if (videoURL) {
+    document.getElementById('videoPlayer').src = videoURL;
+  }
+
+  if (title) {
+    document.getElementById('titleText').textContent = title;
+  }
+</script>
+
+</body>
+</html>
