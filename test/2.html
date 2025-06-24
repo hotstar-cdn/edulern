@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student - Take Test</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #eaeaea; }
+    .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px #ccc; margin-bottom: 20px; }
+    .options div { margin: 8px 0; padding: 10px; background: #f4f4f4; border-radius: 5px; cursor: pointer; }
+    .options div.selected { background: #cce5ff; }
+    button { padding: 10px 20px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Take Test</h1>
+  <input id="testId" placeholder="Enter Test ID" />
+  <button onclick="loadTest()">Start Test</button>
+  <div id="quiz"></div>
+  <div id="result" style="display:none;">
+    <h2>Test Completed</h2>
+    <p id="scoreText"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXsTtzTJA2NyDzWSoKpTWx3r0CBH60Kpo",
+      authDomain: "test-71f93.firebaseapp.com",
+      projectId: "test-71f93",
+      storageBucket: "test-71f93.firebasestorage.app",
+      messagingSenderId: "565806191648",
+      appId: "1:565806191648:web:075781ea2f998abfcc1845",
+      measurementId: "G-7MNQL35KN2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let current = 0, data = [], score = 0, answers = [];
+
+    function renderQuestion() {
+      const q = data[current];
+      const quiz = document.getElementById('quiz');
+      quiz.innerHTML = `
+        <div class="card">
+          <h3>Q${current + 1}: ${q.question}</h3>
+          <div class="options">
+            ${['A', 'B', 'C', 'D'].map(opt => `
+              <div onclick="selectOption('${opt}')">${opt}: ${q.options[opt]}</div>
+            `).join("")}
+          </div>
+          <button onclick="next()">Next</button>
+        </div>
+      `;
+    }
+
+    window.selectOption = function(opt) {
+      answers[current] = opt;
+      const opts = document.querySelectorAll(".options div");
+      opts.forEach(o => o.classList.remove("selected"));
+      opts.forEach(o => { if (o.textContent.startsWith(opt)) o.classList.add("selected"); });
+    }
+
+    window.next = function() {
+      current++;
+      if (current < data.length) {
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    async function loadTest() {
+      const id = document.getElementById('testId').value.trim();
+      const snap = await getDoc(doc(db, "tests", id));
+      if (!snap.exists()) return alert("Test not found.");
+      data = snap.data().questions;
+      current = 0;
+      answers = new Array(data.length);
+      renderQuestion();
+    }
+
+    function showResult() {
+      document.getElementById('quiz').style.display = 'none';
+      score = answers.reduce((acc, val, i) => acc + (val === data[i].answer ? 1 : 0), 0);
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('scoreText').innerText = `Your score: ${score} / ${data.length}`;
+    }
+  </script>
+</body>
+</html>
