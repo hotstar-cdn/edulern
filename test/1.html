@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Teacher - Create Test</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    h1 { color: #333; }
+    input, textarea, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+    .question-box { background: #fff; padding: 15px; margin-top: 10px; border-radius: 8px; }
+    .test-box { background: #e3e3e3; margin-top: 15px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Create a Test</h1>
+  <input id="testId" placeholder="Test ID (unique)" />
+  <div id="questions"></div>
+  <button onclick="addQuestion()">Add Question</button>
+  <button onclick="submitTest()">Submit Test</button>
+  <h2>Delete Old Tests</h2>
+  <input id="deleteTestId" placeholder="Enter Test ID to delete" />
+  <button onclick="deleteTest()">Delete Test</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, deleteDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXsTtzTJA2NyDzWSoKpTWx3r0CBH60Kpo",
+      authDomain: "test-71f93.firebaseapp.com",
+      projectId: "test-71f93",
+      storageBucket: "test-71f93.firebasestorage.app",
+      messagingSenderId: "565806191648",
+      appId: "1:565806191648:web:075781ea2f998abfcc1845",
+      measurementId: "G-7MNQL35KN2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let questionIndex = 0;
+    const questions = [];
+
+    function addQuestion() {
+      if (questions.length >= 100) return alert("Max 100 questions allowed.");
+      const qDiv = document.createElement('div');
+      qDiv.className = "question-box";
+      qDiv.innerHTML = `
+        <textarea placeholder="Question" class="question"></textarea>
+        <input placeholder="Option A" class="optA" />
+        <input placeholder="Option B" class="optB" />
+        <input placeholder="Option C" class="optC" />
+        <input placeholder="Option D" class="optD" />
+        <input placeholder="Correct Option (A/B/C/D)" class="correct" />
+      `;
+      document.getElementById('questions').appendChild(qDiv);
+      questions.push(qDiv);
+    }
+
+    async function submitTest() {
+      const testId = document.getElementById('testId').value.trim();
+      if (!testId) return alert("Enter test ID");
+
+      const data = [];
+      for (let box of questions) {
+        const q = box.querySelector('.question').value;
+        const a = box.querySelector('.optA').value;
+        const b = box.querySelector('.optB').value;
+        const c = box.querySelector('.optC').value;
+        const d = box.querySelector('.optD').value;
+        const correct = box.querySelector('.correct').value.toUpperCase();
+        if (!q || !a || !b || !c || !d || !['A','B','C','D'].includes(correct)) {
+          alert("Fill all fields correctly.");
+          return;
+        }
+        data.push({ question: q, options: { A: a, B: b, C: c, D: d }, answer: correct });
+      }
+
+      await setDoc(doc(db, "tests", testId), { questions: data });
+      alert("Test submitted!");
+    }
+
+    async function deleteTest() {
+      const id = document.getElementById('deleteTestId').value.trim();
+      if (!id) return alert("Enter test ID to delete.");
+      await deleteDoc(doc(db, "tests", id));
+      alert("Test deleted.");
+    }
+  </script>
+</body>
+</html>
