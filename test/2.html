@@ -1,93 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Student | Xperts</title>
+  <title>Student Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #eaeaea; }
-    .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px #ccc; margin-bottom: 20px; }
-    .options div { margin: 8px 0; padding: 10px; background: #f4f4f4; border-radius: 5px; cursor: pointer; }
-    .options div.selected { background: #cce5ff; }
-    button { padding: 10px 20px; margin-top: 10px; }
+    * { box-sizing: border-box; }
+    body { font-family: sans-serif; background: #f9f9f9; padding: 15px; max-width: 500px; margin: auto; }
+    .card { background: white; padding: 20px; border-radius: 12px; margin-top: 15px; box-shadow: 0 2px 6px #ccc; }
+    input, button {
+      width: 100%; padding: 12px; margin-top: 10px;
+      font-size: 1em; border-radius: 6px; border: 1px solid #ccc;
+    }
+    .option {
+      margin: 10px 0; padding: 14px; background: #eee; border-radius: 8px;
+      cursor: pointer; font-size: 1em;
+    }
+    .option.selected { background: #90ee90; }
+    button { background: #007bff; color: white; border: none; }
   </style>
 </head>
 <body>
-  <h1>Take Test</h1>
-  <input id="testId" placeholder="Enter Test ID" />
-  <button onclick="loadTest()">Start Test</button>
-  <div id="quiz"></div>
-  <div id="result" style="display:none;">
-    <h2>Test Completed</h2>
-    <p id="scoreText"></p>
+  <h2>Take Test</h2>
+  <div class="card" id="nameBlock">
+    <input id="studentName" placeholder="Enter Your Name" />
+    <button onclick="startTest()">Start Test</button>
+  </div>
+  <div class="card" id="quizArea" style="display:none;"></div>
+  <div class="card" id="result" style="display:none;">
+    <h3 id="scoreResult"></h3>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDXsTtzTJA2NyDzWSoKpTWx3r0CBH60Kpo",
       authDomain: "test-71f93.firebaseapp.com",
       projectId: "test-71f93",
-      storageBucket: "test-71f93.firebasestorage.app",
+      storageBucket: "test-71f93.appspot.com",
       messagingSenderId: "565806191648",
-      appId: "1:565806191648:web:075781ea2f998abfcc1845",
-      measurementId: "G-7MNQL35KN2"
+      appId: "1:565806191648:web:075781ea2f998abfcc1845"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let current = 0, data = [], score = 0, answers = [];
+    const urlClass = new URLSearchParams(location.search).get("class");
+    let questions = [], answers = [], current = 0, studentName = '', title = '';
 
-    function renderQuestion() {
-      const q = data[current];
-      const quiz = document.getElementById('quiz');
-      quiz.innerHTML = `
-        <div class="card">
-          <h3>Q${current + 1}: ${q.question}</h3>
-          <div class="options">
-            ${['A', 'B', 'C', 'D'].map(opt => `
-              <div onclick="selectOption('${opt}')">${opt}: ${q.options[opt]}</div>
-            `).join("")}
+    async function loadTest() {
+      const snapshot = await getDocs(collection(db, "tests"));
+      let found = null;
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (d.class === urlClass) found = d;
+      });
+      if (!found) {
+        document.body.innerHTML = "<h3>No test available for this class.</h3>";
+        return;
+      }
+      questions = found.questions;
+      title = found.title;
+      answers = Array(questions.length).fill(null);
+    }
+    loadTest();
+
+    window.startTest = () => {
+      studentName = document.getElementById("studentName").value.trim();
+      if (!studentName) return alert("Enter your name");
+      document.getElementById("nameBlock").style.display = "none";
+      document.getElementById("quizArea").style.display = "block";
+      showQuestion();
+    };
+
+    function showQuestion() {
+      const q = questions[current];
+      document.getElementById("quizArea").innerHTML = `
+        <h3>Q${current + 1}/${questions.length}</h3>
+        <p>${q.question}</p>
+        ${["A", "B", "C", "D"].map(opt => `
+          <div class="option ${answers[current] === opt ? 'selected' : ''}" onclick="selectOption('${opt}')">
+            ${opt}: ${q.options[opt]}
           </div>
-          <button onclick="next()">Next</button>
-        </div>
+        `).join('')}
+        <button onclick="prev()">Previous</button>
+        <button onclick="next()">Next</button>
       `;
     }
 
-    window.selectOption = function(opt) {
+    window.selectOption = (opt) => {
       answers[current] = opt;
-      const opts = document.querySelectorAll(".options div");
-      opts.forEach(o => o.classList.remove("selected"));
-      opts.forEach(o => { if (o.textContent.startsWith(opt)) o.classList.add("selected"); });
-    }
-
-    window.next = function() {
-      current++;
-      if (current < data.length) {
-        renderQuestion();
+      showQuestion();
+    };
+    window.prev = () => {
+      if (current > 0) current--;
+      showQuestion();
+    };
+    window.next = async () => {
+      if (current < questions.length - 1) {
+        current++;
+        showQuestion();
       } else {
-        showResult();
+        const score = answers.reduce((s, a, i) => s + (a === questions[i].answer ? 1 : 0), 0);
+        await addDoc(collection(db, "results"), {
+          studentName, class: urlClass, title, score,
+          answers, questions, timestamp: new Date().toISOString()
+        });
+        document.getElementById("quizArea").style.display = "none";
+        document.getElementById("result").style.display = "block";
+        document.getElementById("scoreResult").innerText = `Hello ${studentName}, you scored ${score} / ${questions.length}`;
       }
-    }
-
-    async function loadTest() {
-      const id = document.getElementById('testId').value.trim();
-      const snap = await getDoc(doc(db, "tests", id));
-      if (!snap.exists()) return alert("Test not found.");
-      data = snap.data().questions;
-      current = 0;
-      answers = new Array(data.length);
-      renderQuestion();
-    }
-
-    function showResult() {
-      document.getElementById('quiz').style.display = 'none';
-      score = answers.reduce((acc, val, i) => acc + (val === data[i].answer ? 1 : 0), 0);
-      document.getElementById('result').style.display = 'block';
-      document.getElementById('scoreText').innerText = `Your score: ${score} / ${data.length}`;
-    }
+    };
   </script>
 </body>
 </html>
