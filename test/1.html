@@ -1,91 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Xperts</title>
+  <title>Create Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-    h1 { color: #333; }
-    input, textarea, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
-    .question-box { background: #fff; padding: 15px; margin-top: 10px; border-radius: 8px; }
-    .test-box { background: #e3e3e3; margin-top: 15px; padding: 10px; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      padding: 15px;
+      max-width: 500px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+    }
   </style>
 </head>
 <body>
-  <h1>Create a Test</h1>
-  <input id="testId" placeholder="Test ID (unique)" />
-  <div id="questions"></div>
-  <button onclick="addQuestion()">Add Question</button>
-  <button onclick="submitTest()">Submit Test</button>
-  <h2>Delete Old Tests</h2>
-  <input id="deleteTestId" placeholder="Enter Test ID to delete" />
-  <button onclick="deleteTest()">Delete Test</button>
+  <h2>Teacher: Schedule Test</h2>
+  <div class="card">
+    <input id="testTitle" placeholder="Test Title (e.g. Chapter 3)" />
+    <select id="testClass">
+      <option disabled selected>Select Class</option>
+      <option value="6">Class 6</option>
+      <option value="7">Class 7</option>
+      <option value="8">Class 8</option>
+      <option value="9">Class 9</option>
+      <option value="10">Class 10</option>
+      <option value="11JEE">11 JEE</option>
+      <option value="11NEET">11 NEET</option>
+      <option value="12JEE">12 JEE</option>
+      <option value="12NEET">12 NEET</option>
+    </select>
+    <input type="datetime-local" id="expiry" />
+    <div id="questions"></div>
+    <button onclick="addQuestion()">Add Question</button>
+    <button onclick="submitTest()">Submit Test</button>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, deleteDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDXsTtzTJA2NyDzWSoKpTWx3r0CBH60Kpo",
       authDomain: "test-71f93.firebaseapp.com",
       projectId: "test-71f93",
-      storageBucket: "test-71f93.firebasestorage.app",
+      storageBucket: "test-71f93.appspot.com",
       messagingSenderId: "565806191648",
-      appId: "1:565806191648:web:075781ea2f998abfcc1845",
-      measurementId: "G-7MNQL35KN2"
+      appId: "1:565806191648:web:075781ea2f998abfcc1845"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let questionIndex = 0;
-    const questions = [];
-
-    function addQuestion() {
-      if (questions.length >= 100) return alert("Max 100 questions allowed.");
-      const qDiv = document.createElement('div');
-      qDiv.className = "question-box";
-      qDiv.innerHTML = `
-        <textarea placeholder="Question" class="question"></textarea>
-        <input placeholder="Option A" class="optA" />
-        <input placeholder="Option B" class="optB" />
-        <input placeholder="Option C" class="optC" />
-        <input placeholder="Option D" class="optD" />
+    let qCount = 0;
+    window.addQuestion = () => {
+      if (qCount >= 100) return alert("Max 100 questions.");
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <textarea placeholder="Question" class="q"></textarea>
+        <input placeholder="Option A" class="a" />
+        <input placeholder="Option B" class="b" />
+        <input placeholder="Option C" class="c" />
+        <input placeholder="Option D" class="d" />
         <input placeholder="Correct Option (A/B/C/D)" class="correct" />
       `;
-      document.getElementById('questions').appendChild(qDiv);
-      questions.push(qDiv);
-    }
+      document.getElementById("questions").appendChild(div);
+      qCount++;
+    };
 
-    async function submitTest() {
-      const testId = document.getElementById('testId').value.trim();
-      if (!testId) return alert("Enter test ID");
+    window.submitTest = async () => {
+      const title = document.getElementById("testTitle").value.trim();
+      const cls = document.getElementById("testClass").value;
+      const expiry = document.getElementById("expiry").value;
+      if (!title || !cls || !expiry) return alert("All fields required");
 
-      const data = [];
-      for (let box of questions) {
-        const q = box.querySelector('.question').value;
-        const a = box.querySelector('.optA').value;
-        const b = box.querySelector('.optB').value;
-        const c = box.querySelector('.optC').value;
-        const d = box.querySelector('.optD').value;
-        const correct = box.querySelector('.correct').value.toUpperCase();
-        if (!q || !a || !b || !c || !d || !['A','B','C','D'].includes(correct)) {
-          alert("Fill all fields correctly.");
-          return;
+      const boxes = document.querySelectorAll(".card textarea.q");
+      const questions = [];
+      boxes.forEach((_, i) => {
+        const q = document.querySelectorAll(".q")[i].value;
+        const a = document.querySelectorAll(".a")[i].value;
+        const b = document.querySelectorAll(".b")[i].value;
+        const c = document.querySelectorAll(".c")[i].value;
+        const d = document.querySelectorAll(".d")[i].value;
+        const correct = document.querySelectorAll(".correct")[i].value.toUpperCase();
+        if (q && a && b && c && d && ["A", "B", "C", "D"].includes(correct)) {
+          questions.push({ question: q, options: { A: a, B: b, C: c, D: d }, answer: correct });
         }
-        data.push({ question: q, options: { A: a, B: b, C: c, D: d }, answer: correct });
-      }
+      });
 
-      await setDoc(doc(db, "tests", testId), { questions: data });
-      alert("Test submitted!");
-    }
+      if (questions.length === 0) return alert("Add at least one question");
 
-    async function deleteTest() {
-      const id = document.getElementById('deleteTestId').value.trim();
-      if (!id) return alert("Enter test ID to delete.");
-      await deleteDoc(doc(db, "tests", id));
-      alert("Test deleted.");
-    }
+      await setDoc(doc(db, "tests", `${cls}_${title}`), {
+        title, class: cls, expiry, questions
+      });
+
+      alert("Test Scheduled!");
+      location.reload();
+    };
   </script>
 </body>
 </html>
