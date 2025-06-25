@@ -1,53 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Student View</title>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-  <script src="firebase.js"></script>
+  <title>Live Class Status</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    video { width: 100%; max-width: 600px; border: 2px solid #ccc; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      transition: background 0.5s;
+    }
   </style>
 </head>
 <body>
-  <h1>📺 Live Class</h1>
-  <video id="video" autoplay controls></video>
-
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script>
-    const video = document.getElementById('video');
-    const mediaSource = new MediaSource();
-    video.src = URL.createObjectURL(mediaSource);
+    const firebaseConfig = {
+      apiKey: "AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
+      authDomain: "community-edulearn.firebaseapp.com",
+      projectId: "community-edulearn",
+      storageBucket: "community-edulearn.firebasestorage.app",
+      messagingSenderId: "517780625337",
+      appId: "1:517780625337:web:b4d491cfe8057aa0dd4868",
+      measurementId: "G-7T47TFT2ZX"
+    };
 
-    let loadedSegments = [];
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    mediaSource.addEventListener('sourceopen', () => {
-      const sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs=vp8,opus');
+    const params = new URLSearchParams(window.location.search);
+    const classGroup = params.get("class");
+    const now = Date.now();
 
-      const loadSegments = async () => {
-        const snapshot = await firebase.firestore()
-          .collection('segments')
-          .orderBy('timestamp')
-          .get();
-
-        for (const doc of snapshot.docs) {
-          const { fileName } = doc.data();
-          if (!loadedSegments.includes(fileName)) {
-            loadedSegments.push(fileName);
-
-            const url = await firebase.storage().ref('segments/' + fileName).getDownloadURL();
-            const res = await fetch(url);
-            const buffer = await res.arrayBuffer();
-
-            sourceBuffer.appendBuffer(buffer);
-          }
+    db.collection("classes")
+      .where("classGroup", "==", classGroup)
+      .where("expiry", ">", now)
+      .get()
+      .then(snapshot => {
+        if (!snapshot.empty) {
+          document.body.style.background = "#D5E8FF";  // light blue for live class
+        } else {
+          document.body.style.background = "#FFFFFF"; // white if no class
         }
-      };
-
-      // Load every 5 seconds
-      setInterval(loadSegments, 5000);
-    });
+      });
   </script>
 </body>
 </html>
