@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Redirecting...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; padding: 2rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const classParam = params.get('');
+
+    const redirectMap = {
+      '6': 'https://abc.xyz',
+      '7': 'https://abc.xyz/7',
+      '8': 'https://abc.xyz/8',
+      '9': 'https://abc.xyz/9',
+      '10': 'https://abc.xyz/10',
+      '11_jee': 'https://abc.xyz/11jee',
+      '11_neet': 'https://abc.xyz/11neet',
+      '12_jee': 'https://abc.xyz/12jee',
+      '12_neet': 'https://abc.xyz/12neet'
+    };
+
+    if (classParam && redirectMap[classParam]) {
+      window.location.href = redirectMap[classParam];
+    } else {
+      document.body.innerHTML = '<h2>Invalid or missing class in URL.</h2>';
+    }
+  </script>
+</body>
+</html>
