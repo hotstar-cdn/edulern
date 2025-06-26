@@ -1,122 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Student Classes</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  <meta charset="UTF-8" />
+  <title>Student | Live Classes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css" />
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #eef3fb;
-      padding: 20px;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .class-group {
-      margin-bottom: 40px;
-    }
-
-    .class-label {
-      font-size: 1.3rem;
-      font-weight: bold;
-      margin: 10px 0;
-      padding-left: 10px;
-      color: #1e88e5;
+      background: #f5f5f5;
+      padding: 15px;
+      margin: 0;
     }
 
     .swiper {
-      padding-bottom: 30px;
+      width: 100%;
+      padding-bottom: 40px;
     }
 
     .swiper-slide {
       background: white;
+      border-radius: 15px;
       padding: 20px;
-      border-radius: 16px;
-      max-width: 350px;
-      margin: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-      border-top: 10px solid #1e88e5;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    .swiper-slide.live {
-      border-top-color: #2e7d32;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .title {
+      font-size: 1.2rem;
+      font-weight: bold;
     }
 
     .status {
-      color: #1e88e5;
-      font-weight: bold;
-      margin-bottom: 12px;
-      font-size: 1.1rem;
-    }
-
-    .live .status {
-      color: #2e7d32;
-    }
-
-    h3 {
-      margin: 10px 0 5px;
-      font-size: 1.3rem;
-    }
-
-    .meta {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 10px 0;
-      font-size: 0.95rem;
-      color: #333;
-    }
-
-    .time-window {
-      font-size: 0.9rem;
-      color: #555;
-      margin-bottom: 15px;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border-radius: 25px;
-      border: 2px solid #1e88e5;
-      color: #1e88e5;
-      background: transparent;
-      cursor: pointer;
-      transition: 0.2s;
-      text-decoration: none;
-    }
-
-    .live .btn {
-      border-color: #2e7d32;
-      color: #2e7d32;
-    }
-
-    .btn:hover {
-      background: #1e88e5;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 0.8rem;
       color: white;
     }
 
-    .live .btn:hover {
+    .status.live {
       background: #2e7d32;
+    }
+
+    .status.upcoming {
+      background: #1976d2;
+    }
+
+    .subject {
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    .time {
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    .join-btn {
+      margin-top: 15px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #1976d2;
       color: white;
+      font-size: 1rem;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .join-btn.live {
+      background: #2e7d32;
+    }
+
+    @media(max-width: 600px) {
+      .title {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
 
-<h2>Live & Upcoming Classes</h2>
-<div id="classContainer"></div>
+<h2 style="text-align:center;">Live & Upcoming Classes</h2>
 
-<!-- Swiper & Firebase -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<div class="swiper">
+  <div class="swiper-wrapper" id="classContainer">
+    <!-- Slides inserted here -->
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
@@ -142,89 +123,56 @@
     "12JEE": "https://meet.google.com/xxv-uoir-rio"
   };
 
-  const formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const formatDate = (date) => date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  const urlParams = new URLSearchParams(window.location.search);
+  const filterClass = urlParams.get('class');
 
-  async function loadClasses() {
-    const now = new Date();
-    const params = new URLSearchParams(window.location.search);
-    const filterClass = params.get("class");
-    const snapshot = await db.collection("classes").orderBy("start").get();
+  const now = new Date();
 
-    const grouped = {};
-    for (const doc of snapshot.docs) {
-      const data = doc.data();
-      const start = new Date(data.start.seconds * 1000);
-      const end = new Date(data.end.seconds * 1000);
-
-      if (end < now) {
-        await db.collection("classes").doc(doc.id).delete(); // remove expired
-        continue;
-      }
-
-      if (filterClass && filterClass !== data.class) continue;
-
-      const classKey = data.class;
-      if (!grouped[classKey]) grouped[classKey] = [];
-      grouped[classKey].push({ ...data, id: doc.id, start, end });
-    }
-
+  db.collection("classes").orderBy("start").onSnapshot(snapshot => {
     const container = document.getElementById("classContainer");
     container.innerHTML = "";
 
-    for (const [classKey, schedules] of Object.entries(grouped)) {
-      const classGroupDiv = document.createElement("div");
-      classGroupDiv.className = "class-group";
+    let filtered = snapshot.docs.filter(doc => {
+      const data = doc.data();
+      const isExpired = new Date(data.end.seconds * 1000) < now;
+      return !isExpired && (!filterClass || data.class === filterClass);
+    });
 
-      const classTitle = document.createElement("div");
-      classTitle.className = "class-label";
-      classTitle.innerText = `Class ${classKey}`;
-      classGroupDiv.appendChild(classTitle);
-
-      const swiperDiv = document.createElement("div");
-      const swiperId = `swiper-${classKey}`;
-      swiperDiv.className = "swiper";
-      swiperDiv.innerHTML = `
-        <div class="swiper-wrapper" id="${swiperId}"></div>
-        <div class="swiper-pagination"></div>
-      `;
-      classGroupDiv.appendChild(swiperDiv);
-      container.appendChild(classGroupDiv);
-
-      const wrapper = swiperDiv.querySelector(".swiper-wrapper");
-
-      for (const sched of schedules) {
-        const isLive = now >= sched.start && now <= sched.end;
-        const duration = Math.round((sched.end - sched.start) / 60000);
-        const status = isLive ? "LIVE" : "UPCOMING";
-
-        const slide = document.createElement("div");
-        slide.className = "swiper-slide" + (isLive ? " live" : "");
-        slide.innerHTML = `
-          <div class="status">${status}</div>
-          <h3>${sched.title}</h3>
-          <div class="meta">
-            <span>📅 ${formatDate(sched.start)}</span>
-            <span>⏱ ${duration} Min</span>
-          </div>
-          <div class="time-window">Test Window ${formatTime(sched.start)} – ${formatTime(sched.end)}</div>
-          <a class="btn" ${isLive ? `href="${classLinks[sched.class]}"` : 'style="pointer-events:none;opacity:0.5;"'}>
-            ${isLive ? 'Join Now' : 'Shaduled Class'}
-          </a>
-        `;
-        wrapper.appendChild(slide);
-      }
-
-      new Swiper(swiperDiv, {
-        slidesPerView: 1,
-        spaceBetween: 20,
-        pagination: { el: swiperDiv.querySelector('.swiper-pagination'), clickable: true }
-      });
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="swiper-slide"><p>No upcoming classes.</p></div>`;
     }
-  }
 
-  loadClasses();
+    filtered.forEach(doc => {
+      const data = doc.data();
+      const start = new Date(data.start.seconds * 1000);
+      const end = new Date(data.end.seconds * 1000);
+      const isLive = now >= start && now <= end;
+      const statusClass = isLive ? 'live' : 'upcoming';
+      const statusText = isLive ? 'Live' : 'Upcoming';
+      const joinText = isLive ? 'Join Now' : 'Scheduled';
+      const link = classLinks[data.class] || "#";
+
+      const slide = document.createElement("div");
+      slide.className = "swiper-slide";
+      slide.innerHTML = `
+        <div class="card-header">
+          <div class="title">${data.title}</div>
+          <div class="status ${statusClass}">${statusText}</div>
+        </div>
+        <div class="subject">${data.subject}</div>
+        <div class="time">From: ${start.toLocaleString()}</div>
+        <div class="time">To: ${end.toLocaleString()}</div>
+        <button class="join-btn ${isLive ? 'live' : ''}" onclick="window.location.href='${link}'">${joinText}</button>
+      `;
+      container.appendChild(slide);
+    });
+
+    new Swiper('.swiper', {
+      slidesPerView: 1,
+      spaceBetween: 15,
+      loop: false,
+    });
+  });
 </script>
-
 </body>
 </html>
