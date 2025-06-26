@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Student Classes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
   <style>
     body {
       margin: 0;
@@ -42,6 +42,7 @@
       border-top: 10px solid #1e88e5;
       max-width: 330px;
       margin: auto;
+      transition: border-color 0.3s;
     }
 
     .swiper-slide.live {
@@ -72,6 +73,10 @@
       justify-content: center;
       margin: 8px 0;
       flex-wrap: wrap;
+    }
+
+    .meta span i {
+      margin-right: 5px;
     }
 
     .time-window {
@@ -117,6 +122,9 @@
       }
     }
   </style>
+
+  <!-- Font Awesome for icons -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -169,7 +177,7 @@
       const end = new Date(data.end.seconds * 1000);
 
       if (end < now) {
-        await db.collection("classes").doc(doc.id).delete();
+        await db.collection("classes").doc(doc.id).delete(); // Clean old
         continue;
       }
 
@@ -215,10 +223,10 @@
           <div class="status">${status}</div>
           <h3>${sched.title}</h3>
           <div class="meta">
-            <span>📅 ${formatDate(sched.start)}</span>
-            <span>⏱ ${duration} Min</span>
+            <span><i class="fas fa-calendar-alt"></i> ${formatDate(sched.start)}</span>
+            <span><i class="fas fa-clock"></i> ${duration} Min</span>
           </div>
-          <div class="time-window">Test Window ${formatTime(sched.start)} – ${formatTime(sched.end)}</div>
+          <div class="time-window">Window ${formatTime(sched.start)} – ${formatTime(sched.end)}</div>
           <a class="btn" ${isLive ? `href="${classLinks[sched.class]}" target="_blank"` : 'style="pointer-events:none;opacity:0.5;"'}>
             ${isLive ? 'Join Now' : 'Scheduled'}
           </a>
@@ -238,6 +246,8 @@
   }
 
   loadClasses();
+  setInterval(loadClasses, 30000); // auto-refresh every 30 seconds
+
 </script>
 
 </body>
