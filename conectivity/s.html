@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Classes</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  <style>
+    body { font-family: Arial; background: #eef; padding: 20px; }
+    .swiper-slide {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .join-btn {
+      padding: 10px; margin-top: 10px;
+      background: #007bff; color: white;
+      border: none; border-radius: 5px;
+    }
+    .join-btn.live { background-color: green; }
+    .status { font-weight: bold; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h2>Available Classes</h2>
+<div class="swiper mySwiper">
+  <div class="swiper-wrapper" id="classList"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
+    authDomain: "edulearn-live-class-datasets.firebaseapp.com",
+    projectId: "edulearn-live-class-datasets",
+    storageBucket: "edulearn-live-class-datasets.firebasestorage.app",
+    messagingSenderId: "599551118203",
+    appId: "1:599551118203:web:0cfbde334243d3742dcbde",
+    measurementId: "G-JNZSP50J5N"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const links = {
+    "6": "https://meet.google.com/amf-mqim-buc",
+    "7": "https://meet.google.com/jgi-dvhg-fuz",
+    "8": "https://meet.google.com/gzi-obdg-oof",
+    "9": "https://meet.google.com/mgz-qfbe-rzg",
+    "10": "https://meet.google.com/tkk-npnb-sgm",
+    "11NEET": "https://meet.google.com/uia-pzmj-qvq",
+    "11JEE": "https://meet.google.com/asi-zwyg-zto",
+    "12NEET": "https://meet.google.com/dbx-azvv-qon",
+    "12JEE": "https://meet.google.com/xxv-uoir-rio"
+  };
+
+  async function loadClasses() {
+    const params = new URLSearchParams(window.location.search);
+    const filter = params.get("class");
+
+    const now = new Date();
+    const snapshot = await db.collection("classes").orderBy("start").get();
+    const wrapper = document.getElementById("classList");
+    wrapper.innerHTML = "";
+
+    snapshot.forEach(async (doc) => {
+      const data = doc.data();
+      const start = new Date(data.start.seconds * 1000);
+      const end = new Date(data.end.seconds * 1000);
+
+      if (end < now) {
+        await db.collection("classes").doc(doc.id).delete();
+        return;
+      }
+
+      if (filter && data.class !== filter) return;
+
+      const isLive = now >= start && now <= end;
+      const status = isLive ? "Live" : "Upcoming";
+      const duration = Math.round((end - start) / 60000);
+
+      const div = document.createElement("div");
+      div.className = "swiper-slide";
+      div.innerHTML = `
+        <h3>${data.title}</h3>
+        <p><strong>Subject:</strong> ${data.subject}</p>
+        <p><strong>Class:</strong> ${data.class}</p>
+        <p><strong>Starts:</strong> ${start.toLocaleString()}</p>
+        <p><strong>Duration:</strong> ${duration} min</p>
+        <p class="status">${status}</p>
+        <button class="join-btn ${isLive ? 'live' : ''}" ${!isLive ? 'disabled' : ''} data-class="${data.class}">
+          ${isLive ? "Join Now" : "Scheduled"}
+        </button>
+      `;
+      wrapper.appendChild(div);
+    });
+
+    setTimeout(() => {
+      new Swiper(".mySwiper", { slidesPerView: 1, spaceBetween: 20, loop: true });
+    }, 300);
+  }
+
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("join-btn") && e.target.dataset.class) {
+      const cls = e.target.dataset.class;
+      if (links[cls]) window.location.href = links[cls];
+    }
+  });
+
+  loadClasses();
+</script>
+
+</body>
+</html>
