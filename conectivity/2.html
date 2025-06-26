@@ -3,47 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <title>Student Classes</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #eef3fb;
       margin: 0;
       padding: 15px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #eef3fb;
     }
 
     h2 {
       text-align: center;
-      margin: 20px 0;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
+      margin-bottom: 20px;
     }
 
     .class-group {
-      margin-bottom: 40px;
+      margin-bottom: 30px;
     }
 
     .class-label {
-      font-size: 1.2rem;
+      font-size: 1rem;
       font-weight: 600;
-      margin: 10px 0;
-      padding-left: 10px;
       color: #1e88e5;
+      margin: 10px 0 5px 8px;
     }
 
     .swiper {
-      padding-bottom: 30px;
+      padding-bottom: 25px;
     }
 
     .swiper-slide {
-      background: #fff;
-      padding: 20px;
+      background: white;
+      padding: 18px;
       border-radius: 16px;
-      max-width: 100%;
-      margin: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
       border-top: 10px solid #1e88e5;
+      max-width: 330px;
+      margin: auto;
     }
 
     .swiper-slide.live {
@@ -52,9 +50,9 @@
 
     .status {
       font-weight: bold;
-      color: #1e88e5;
-      margin-bottom: 10px;
       font-size: 1rem;
+      color: #1e88e5;
+      margin-bottom: 8px;
     }
 
     .live .status {
@@ -63,40 +61,39 @@
 
     h3 {
       font-size: 1.1rem;
-      margin: 5px 0;
+      margin: 6px 0;
     }
 
     .meta {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #333;
-      margin: 10px 0;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 8px 0;
+      flex-wrap: wrap;
     }
 
     .time-window {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #666;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .btn {
       display: inline-block;
-      padding: 10px 18px;
+      padding: 8px 20px;
       font-size: 1rem;
-      border-radius: 25px;
       border: 2px solid #1e88e5;
       color: #1e88e5;
-      background: transparent;
+      border-radius: 24px;
       text-decoration: none;
-      transition: 0.2s;
+      transition: 0.3s;
     }
 
     .btn:hover {
       background: #1e88e5;
-      color: #fff;
+      color: white;
     }
 
     .live .btn {
@@ -106,12 +103,17 @@
 
     .live .btn:hover {
       background: #2e7d32;
-      color: #fff;
+      color: white;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 400px) {
       .swiper-slide {
+        max-width: 95%;
         padding: 16px;
+      }
+
+      h2 {
+        font-size: 1rem;
       }
     }
   </style>
@@ -135,6 +137,7 @@
     appId: "1:599551118203:web:0cfbde334243d3742dcbde",
     measurementId: "G-JNZSP50J5N"
   };
+
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
@@ -166,7 +169,7 @@
       const end = new Date(data.end.seconds * 1000);
 
       if (end < now) {
-        await db.collection("classes").doc(doc.id).delete(); // auto delete expired
+        await db.collection("classes").doc(doc.id).delete();
         continue;
       }
 
@@ -216,8 +219,8 @@
             <span>⏱ ${duration} Min</span>
           </div>
           <div class="time-window">Test Window ${formatTime(sched.start)} – ${formatTime(sched.end)}</div>
-          <a class="btn" ${isLive ? `href="${classLinks[sched.class]}"` : 'style="pointer-events:none;opacity:0.5;"'}>
-            ${isLive ? 'Join Now' : 'Shaduled Class'}
+          <a class="btn" ${isLive ? `href="${classLinks[sched.class]}" target="_blank"` : 'style="pointer-events:none;opacity:0.5;"'}>
+            ${isLive ? 'Join Now' : 'Scheduled'}
           </a>
         `;
         wrapper.appendChild(slide);
@@ -225,8 +228,11 @@
 
       new Swiper(swiperDiv, {
         slidesPerView: 1,
-        spaceBetween: 15,
-        pagination: { el: swiperDiv.querySelector('.swiper-pagination'), clickable: true }
+        spaceBetween: 20,
+        pagination: {
+          el: swiperDiv.querySelector(".swiper-pagination"),
+          clickable: true,
+        },
       });
     }
   }
