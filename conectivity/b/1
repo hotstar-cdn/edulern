@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Classes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #eef3fb;
+      padding: 10px;
+      margin: 0;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 15px 0 25px;
+    }
+
+    .class-group {
+      margin-bottom: 40px;
+    }
+
+    .class-label {
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding-left: 10px;
+      color: #1e88e5;
+    }
+
+    .swiper {
+      padding-bottom: 30px;
+    }
+
+    .swiper-slide {
+      background: white;
+      padding: 15px;
+      border-radius: 16px;
+      max-width: 350px;
+      margin: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border-top: 10px solid #1e88e5;
+      transition: all 0.3s ease;
+    }
+
+    .swiper-slide.live {
+      border-top-color: #2e7d32;
+    }
+
+    .status {
+      color: #1e88e5;
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .live .status {
+      color: #2e7d32;
+    }
+
+    h3 {
+      margin: 10px 0 5px;
+      font-size: 1.2rem;
+    }
+
+    .meta {
+      font-size: 0.95rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .time-window {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      font-size: 1rem;
+      border-radius: 25px;
+      border: 2px solid #1e88e5;
+      color: #1e88e5;
+      background: transparent;
+      cursor: pointer;
+      transition: 0.2s;
+      text-decoration: none;
+    }
+
+    .live .btn {
+      border-color: #2e7d32;
+      color: #2e7d32;
+    }
+
+    .btn:hover {
+      background: #1e88e5;
+      color: white;
+    }
+
+    .live .btn:hover {
+      background: #2e7d32;
+      color: white;
+    }
+
+    .subject-img {
+      width: 100%;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 400px) {
+      .swiper-slide {
+        max-width: 95%;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h2>Live & Upcoming Classes</h2>
+<div id="classContainer"></div>
+
+<!-- Swiper & Firebase -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
+    authDomain: "edulearn-live-class-datasets.firebaseapp.com",
+    projectId: "edulearn-live-class-datasets",
+    storageBucket: "edulearn-live-class-datasets.firebasestorage.app",
+    messagingSenderId: "599551118203",
+    appId: "1:599551118203:web:0cfbde334243d3742dcbde",
+    measurementId: "G-JNZSP50J5N"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const classLinks = {
+    "6": "https://meet.google.com/amf-mqim-buc",
+    "7": "https://meet.google.com/jgi-dvhg-fuz",
+    "8": "https://meet.google.com/gzi-obdg-oof",
+    "9": "https://meet.google.com/mgz-qfbe-rzg",
+    "10": "https://meet.google.com/tkk-npnb-sgm",
+    "11NEET": "https://meet.google.com/uia-pzmj-qvq",
+    "11JEE": "https://meet.google.com/asi-zwyg-zto",
+    "12NEET": "https://meet.google.com/dbx-azvv-qon",
+    "12JEE": "https://meet.google.com/xxv-uoir-rio"
+  };
+
+  const subjectImages = {
+    "BOTANY": "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp",
+    "ZOOLOGY": "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp",
+    "PHYSICS": "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp",
+    "CHEMISTRY": "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp",
+    "MATH": "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp",
+    "ENGLISH": "https://thumbnail.allen.in/f99e56bd-fa3b-439a-af39-27a1f575e93b/original.webp",
+    "SST": "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp"
+  };
+
+  const formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const formatDate = (date) => date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+
+  async function loadClasses() {
+    const now = new Date();
+    const params = new URLSearchParams(window.location.search);
+    const filterClass = params.get("class");
+    const snapshot = await db.collection("classes").orderBy("start").get();
+
+    const grouped = {};
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      const start = new Date(data.start.seconds * 1000);
+      const end = new Date(data.end.seconds * 1000);
+
+      if (end < now) {
+        await db.collection("classes").doc(doc.id).delete();
+        continue;
+      }
+
+      if (filterClass && filterClass !== data.class) continue;
+
+      if (!grouped[data.class]) grouped[data.class] = [];
+      grouped[data.class].push({ ...data, id: doc.id, start, end });
+    }
+
+    const container = document.getElementById("classContainer");
+    container.innerHTML = "";
+
+    for (const [classKey, schedules] of Object.entries(grouped)) {
+      const groupDiv = document.createElement("div");
+      groupDiv.className = "class-group";
+
+      const label = document.createElement("div");
+      label.className = "class-label";
+      label.textContent = `Class ${classKey}`;
+      groupDiv.appendChild(label);
+
+      const swiperDiv = document.createElement("div");
+      swiperDiv.className = "swiper";
+      swiperDiv.innerHTML = `<div class="swiper-wrapper" id="swiper-${classKey}"></div><div class="swiper-pagination"></div>`;
+      groupDiv.appendChild(swiperDiv);
+      container.appendChild(groupDiv);
+
+      const wrapper = swiperDiv.querySelector(".swiper-wrapper");
+
+      for (const sched of schedules) {
+        const isLive = new Date() >= sched.start && new Date() <= sched.end;
+        const duration = Math.round((sched.end - sched.start) / 60000);
+        const subjectImage = subjectImages[sched.subject.toUpperCase()] || '';
+
+        const slide = document.createElement("div");
+        slide.className = "swiper-slide" + (isLive ? " live" : "");
+        slide.innerHTML = `
+          ${subjectImage ? `<img class="subject-img" src="${subjectImage}" alt="${sched.subject}" />` : ""}
+          <div class="status">${isLive ? 'LIVE' : 'UPCOMING'}</div>
+          <h3>${sched.title}</h3>
+          <div class="meta">📅 ${formatDate(sched.start)} &nbsp; ⏱ ${duration} Min</div>
+          <div class="time-window">${formatTime(sched.start)} – ${formatTime(sched.end)}</div>
+          <a class="btn" ${isLive ? `href="${classLinks[sched.class]}"` : 'style="pointer-events:none;opacity:0.5;"'}>
+            ${isLive ? 'Join Now' : 'Shaduled Class'}
+          </a>
+        `;
+        wrapper.appendChild(slide);
+      }
+
+      new Swiper(swiperDiv, {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        pagination: { el: swiperDiv.querySelector('.swiper-pagination'), clickable: true }
+      });
+    }
+  }
+
+  loadClasses();
+  setInterval(loadClasses, 30000); // auto-refresh every 30s
+</script>
+
+</body>
+</html>
