@@ -2,37 +2,72 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Schedule a Class</title>
+  <title>Teacher | Schedule Class</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
-    form { background: white; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; }
-    label { display: block; margin-top: 10px; }
-    input, select, button { width: 100%; padding: 10px; margin-top: 5px; }
-    button { background: #28a745; color: white; border: none; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    form {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #125ea4;
+    }
   </style>
 </head>
 <body>
 
-<h2>Teacher: Schedule a Live Class</h2>
+<h2>Schedule a Class</h2>
+
 <form id="classForm">
-  <label>Title <input type="text" name="title" required></label>
-  <label>Subject <input type="text" name="subject" required></label>
-  <label>Class
-    <select name="class" required>
-      <option value="6">6</option>
-      <option value="7">7</option>
-      <option value="8">8</option>
-      <option value="9">9</option>
-      <option value="10">10</option>
-      <option value="11JEE">11JEE</option>
-      <option value="11NEET">11NEET</option>
-      <option value="12JEE">12JEE</option>
-      <option value="12NEET">12NEET</option>
-    </select>
-  </label>
-  <label>Start Time <input type="datetime-local" name="start" required></label>
-  <label>End Time <input type="datetime-local" name="end" required></label>
-  <button type="submit">Schedule Class</button>
+  <input type="text" placeholder="Title" id="title" required />
+  <input type="text" placeholder="Subject" id="subject" required />
+  <select id="class" required>
+    <option value="">Select Class</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+    <option value="10">10</option>
+    <option value="11NEET">11 NEET</option>
+    <option value="11JEE">11 JEE</option>
+    <option value="12NEET">12 NEET</option>
+    <option value="12JEE">12 JEE</option>
+  </select>
+  <input type="datetime-local" id="start" required />
+  <input type="datetime-local" id="end" required />
+  <button type="submit">Submit</button>
 </form>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -50,19 +85,24 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  document.getElementById("classForm").addEventListener("submit", async (e) => {
+  document.getElementById('classForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target));
+    const title = document.getElementById('title').value;
+    const subject = document.getElementById('subject').value;
+    const classValue = document.getElementById('class').value;
+    const start = new Date(document.getElementById('start').value);
+    const end = new Date(document.getElementById('end').value);
+
     await db.collection("classes").add({
-      title: data.title,
-      subject: data.subject,
-      class: data.class,
-      start: new Date(data.start),
-      end: new Date(data.end),
-      createdAt: new Date()
+      title,
+      subject,
+      class: classValue,
+      start: firebase.firestore.Timestamp.fromDate(start),
+      end: firebase.firestore.Timestamp.fromDate(end)
     });
-    alert("Class scheduled successfully!");
-    e.target.reset();
+
+    alert("Class Scheduled!");
+    document.getElementById('classForm').reset();
   });
 </script>
 
