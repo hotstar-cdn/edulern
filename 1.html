@@ -1,54 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Teacher Panel</title>
+  <title>Schedule Class</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
     body { font-family: Arial; padding: 20px; }
-    input, button { padding: 10px; margin: 10px 0; display: block; width: 100%; }
+    label, select, input { display: block; margin: 10px 0; }
+    button { padding: 10px 20px; }
+    img { width: 200px; margin: 10px 0; }
   </style>
 </head>
 <body>
   <h2>Schedule a Class</h2>
-  <input type="datetime-local" id="scheduleTime" />
-  <button onclick="scheduleClass()">Schedule Class</button>
-
-  <h2>OR</h2>
-  <button onclick="startInstantClass()">Start Instant Class</button>
+  <label>Title: <input type="text" id="title" /></label>
+  <label>Subject:
+    <select id="subject" onchange="showImage()">
+      <option value="">--Select--</option>
+      <option value="physics">Physics</option>
+      <option value="chemistry">Chemistry</option>
+      <option value="maths">Maths</option>
+      <option value="botany">Botany</option>
+      <option value="zoology">Zoology</option>
+      <option value="english">English</option>
+      <option value="sst">SST</option>
+    </select>
+  </label>
+  <img id="subjectImg" src="" style="display:none;" />
+  <label>Class:
+    <select id="class">
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+      <option value="11JEE">11 JEE</option>
+      <option value="11NEET">11 NEET</option>
+      <option value="12JEE">12 JEE</option>
+      <option value="12NEET">12 NEET</option>
+    </select>
+  </label>
+  <label>Start Time: <input type="datetime-local" id="startTime" /></label>
+  <label>Expire Time: <input type="datetime-local" id="expireTime" /></label>
+  <button onclick="schedule()">Schedule</button>
 
   <script>
-    // Firebase Config
     const firebaseConfig = {
-      apiKey: "AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
-      authDomain: "community-edulearn.firebaseapp.com",
-      projectId: "community-edulearn",
-      storageBucket: "community-edulearn.firebasestorage.app",
-      messagingSenderId: "517780625337",
-      appId: "1:517780625337:web:b4d491cfe8057aa0dd4868",
-      measurementId: "G-7T47TFT2ZX"
+      apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
+      authDomain: "edulearn-live-class-datasets.firebaseapp.com",
+      projectId: "edulearn-live-class-datasets",
+      storageBucket: "edulearn-live-class-datasets.firebasestorage.app",
+      messagingSenderId: "599551118203",
+      appId: "1:599551118203:web:0cfbde334243d3742dcbde",
+      measurementId: "G-JNZSP50J5N"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    function scheduleClass() {
-      const time = document.getElementById('scheduleTime').value;
-      if (!time) return alert("Please select date and time");
+    const subjectImages = {
+      botany: "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp",
+      zoology: "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp",
+      physics: "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp",
+      chemistry: "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp",
+      maths: "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp",
+      english: "https://thumbnail.allen.in/f99e56bd-fa3b-439a-af39-27a1f575e93b/original.webp",
+      sst: "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp"
+    };
 
-      db.collection("classes").doc("latest").set({
-        status: "scheduled",
-        time: new Date(time).toISOString()
-      }).then(() => {
-        alert("Class scheduled successfully!");
-      });
+    function showImage() {
+      const subject = document.getElementById("subject").value;
+      const img = document.getElementById("subjectImg");
+      img.src = subjectImages[subject];
+      img.style.display = subject ? 'block' : 'none';
     }
 
-    function startInstantClass() {
-      db.collection("classes").doc("latest").set({
-        status: "instant",
-        time: new Date().toISOString()
-      }).then(() => {
-        alert("Instant class started!");
+    function schedule() {
+      const data = {
+        title: document.getElementById("title").value,
+        subject: document.getElementById("subject").value,
+        class: document.getElementById("class").value,
+        startTime: new Date(document.getElementById("startTime").value).getTime(),
+        expireTime: new Date(document.getElementById("expireTime").value).getTime(),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      db.collection("classes").add(data).then(() => {
+        alert("Class scheduled!");
       });
     }
   </script>
