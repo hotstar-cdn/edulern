@@ -2,147 +2,170 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Student Homework</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheduled Classes</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f0f2f5;
+      background: #f2f4f8;
       margin: 0;
       padding: 20px;
     }
 
-    .homework-list {
-      max-width: 700px;
-      margin: auto;
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 20px;
     }
 
     .card {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px 20px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      border-left: 5px solid #3498db;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      min-width: 280px;
+      max-width: 320px;
+      padding: 15px;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
     }
 
-    .card-text {
-      max-width: 85%;
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 12px;
+      height: 160px;
+      object-fit: cover;
+      margin-bottom: 10px;
     }
 
     .title {
+      font-size: 1.2rem;
       font-weight: 600;
-      font-size: 1.1rem;
-      color: #2c3e50;
+      margin-bottom: 6px;
     }
 
-    .topic {
-      font-size: 0.95rem;
+    .info {
       color: #555;
-      margin-top: 2px;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
     }
 
-    .meta {
-      font-size: 0.85rem;
+    .badge {
+      display: inline-block;
+      background: red;
+      color: white;
+      font-size: 0.8rem;
+      padding: 3px 8px;
+      border-radius: 12px;
       margin-top: 8px;
-      color: #999;
+      margin-bottom: 10px;
     }
 
-    .subject-icon {
-      font-size: 2rem;
-      align-self: center;
+    .btn {
+      display: inline-block;
+      background: #28a745;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
     }
 
-    .divider {
-      height: 1px;
-      background: #e0e0e0;
-      margin: 14px 0;
-    }
-
-    @media (max-width: 600px) {
-      .card {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .card-text {
-        max-width: 100%;
-      }
-
-      .subject-icon {
-        align-self: flex-start;
-      }
+    .btn[disabled] {
+      background: #ccc;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <h2 style="text-align:center; color:#2c3e50;">📚 Homework Backlog</h2>
-  <div class="homework-list" id="homeworkList">Loading...</div>
+  <h2>Scheduled Classes</h2>
+  <div id="classes" class="carousel"></div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyAX27di1k3zuHMdFVtuzFjqAnXKb-Juo7Y",
-      authDomain: "community-edulearn.firebaseapp.com",
-      projectId: "community-edulearn",
-      storageBucket: "community-edulearn.appspot.com",
-      messagingSenderId: "517780625337",
-      appId: "1:517780625337:web:b4d491cfe8057aa0dd4868"
+      apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
+      authDomain: "edulearn-live-class-datasets.firebaseapp.com",
+      projectId: "edulearn-live-class-datasets",
+      storageBucket: "edulearn-live-class-datasets.firebasestorage.app",
+      messagingSenderId: "599551118203",
+      appId: "1:599551118203:web:0cfbde334243d3742dcbde",
+      measurementId: "G-JNZSP50J5N"
     };
-    firebase.initializeApp(firebaseConfig);
+
+    const links = {
+      "6": "https://meet.google.com/amf-mqim-buc",
+      "7": "https://meet.google.com/jgi-dvhg-fuz",
+      "8": "https://meet.google.com/gzi-obdg-oof",
+      "9": "https://meet.google.com/mgz-qfbe-rzg",
+      "10": "https://meet.google.com/tkk-npnb-sgm",
+      "11NEET": "https://meet.google.com/uia-pzmj-qvq",
+      "11JEE": "https://meet.google.com/asi-zwyg-zto",
+      "12NEET": "https://meet.google.com/dbx-azvv-qon",
+      "12JEE": "https://meet.google.com/xxv-uoir-rio"
+    };
+
+    const images = {
+      "botany": "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp",
+      "zoology": "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp",
+      "physics": "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp",
+      "chemistry": "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp",
+      "maths": "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp",
+      "english": "https://thumbnail.allen.in/f99e56bd-fa3b-439a-af39-27a1f575e93b/original.webp",
+      "sst": "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const subjectIcons = {
-      "Math": "📐",
-      "Science": "🧪",
-      "English": "📖",
-      "History": "🧭",
-      "Geography": "🌍",
-      "Physics": "🔬",
-      "Chemistry": "⚗️",
-      "Biology": "🧬",
-      "Civics": "🏛️",
-      "Computer": "💻"
-    };
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedClass = urlParams.get('class');
 
-    function formatDate(ms) {
-      const date = new Date(ms);
-      return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    function renderCard(doc) {
+      const data = doc.data();
+      const now = new Date();
+      const start = new Date(data.start);
+      const expire = new Date(data.expire);
+      if (now > expire) {
+        doc.ref.delete(); // auto delete expired
+        return;
+      }
+
+      if (selectedClass && data.class !== selectedClass) return;
+
+      const isLive = now >= start && now <= expire;
+
+      const div = document.createElement('div');
+      div.className = 'card';
+
+      div.innerHTML = `
+        <img src="${images[data.subject] || ''}" alt="${data.subject}">
+        <div class="title">${data.title}</div>
+        <div class="info">Subject: ${data.subject}</div>
+        <div class="info">Class: ${data.class}</div>
+        <div class="info">Duration: ${Math.floor((expire - start) / 60000)} mins</div>
+        ${isLive ? '<div class="badge">Live</div>' : ''}
+        <a class="btn" href="${links[data.class] || '#'}" ${!isLive ? 'disabled' : ''}>${isLive ? 'Join Now' : 'Scheduled'}</a>
+      `;
+
+      document.getElementById('classes').appendChild(div);
     }
 
-    function loadHomework() {
-      const container = document.getElementById("homeworkList");
-      db.collection("homework").orderBy("dueTimestamp", "desc").get().then(snapshot => {
-        container.innerHTML = "";
-        snapshot.forEach(doc => {
-          const hw = doc.data();
-          const icon = subjectIcons[hw.subject] || "📘";
-          const due = formatDate(hw.dueTimestamp);
-          const card = `
-            <div class="card">
-              <div class="card-text">
-                <div class="title">${hw.title}</div>
-                <div class="topic">${hw.topic || ''}</div>
-                <div class="meta">${hw.questionCount || '0'} Qs • Due: ${due}</div>
-              </div>
-              <div class="subject-icon">${icon}</div>
-            </div>
-          `;
-          container.innerHTML += card;
-        });
-
-        if (snapshot.empty) {
-          container.innerHTML = "<p style='text-align:center;'>No homework found.</p>";
-        }
-      });
-    }
-
-    loadHomework();
+    db.collection("classes").orderBy("start").onSnapshot(snapshot => {
+      document.getElementById('classes').innerHTML = '';
+      snapshot.forEach(renderCard);
+    });
   </script>
 </body>
 </html>
