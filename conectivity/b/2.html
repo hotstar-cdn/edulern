@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=340, initial-scale=1.0" />
-  <title>v=1.0.0</title>
+  <title>Live Classes</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #eef3fb;
-      margin: 0; padding: 10px;
+      margin: 0;
+      padding: 10px;
     }
     h2 {
       text-align: center;
@@ -27,11 +28,12 @@
     }
     .swiper {
       width: 100%;
-      max-width: 350px;
+      max-width: 340px;
       padding-bottom: 20px;
     }
     .swiper-slide {
       background: white;
+      width: 330px !important;
       padding: 12px;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -52,12 +54,13 @@
       font-weight: bold;
       margin-bottom: 6px;
       color: #1976d2;
-    }
-    .live .status {
-      color: #2e7d32;
+      text-align: left;
     }
     .status.red {
       color: red;
+    }
+    .live .status {
+      color: #2e7d32;
     }
     h3 {
       margin: 4px 0;
@@ -105,10 +108,7 @@
   const firebaseConfig = {
     apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
     authDomain: "edulearn-live-class-datasets.firebaseapp.com",
-    projectId: "edulearn-live-class-datasets",
-    storageBucket: "edulearn-live-class-datasets.firebasestorage.app",
-    messagingSenderId: "599551118203",
-    appId: "1:599551118203:web:0cfbde334243d3742dcbde"
+    projectId: "edulearn-live-class-datasets"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
@@ -171,12 +171,12 @@
           : (minsTo>0 && minsTo<=60)
             ? `Starts in ${minsTo} min`
             : formatTime(item.start);
-        const statusClass = isLive ? 'started' : (minsTo>0 && minsTo<=60 ? '' : '');
+        const statusColor = isLive ? 'status red' : (minsTo <= 60 ? 'status' : 'status');
         const slide = document.createElement('div');
         slide.className = `swiper-slide${isLive?' live':''}`;
         slide.innerHTML = `
           <img class="class-img" src="${subjectImages[item.subject.toLowerCase()]||''}" alt="${item.subject}">
-          <div class="status ${statusClass}">${status}</div>
+          <div class="${statusColor}">${status}</div>
           <h3>${item.title}</h3>
           <div class="meta">Subject: ${item.subject}</div>
           <div class="meta">🕒 ${formatTime(item.start)} - ${formatTime(item.end)}</div>
@@ -194,10 +194,9 @@
   }
 
   db.collection('classes').orderBy('start').onSnapshot(snap => render(snap.docs));
-  // refresh time-sensitive labels every 30s
-  setInterval(()=>{
-    db.collection('classes').orderBy('start').get().then(snap=>render(snap.docs));
-  },30000);
+  setInterval(() => {
+    db.collection('classes').orderBy('start').get().then(snap => render(snap.docs));
+  }, 30000);
 </script>
 </body>
 </html>
