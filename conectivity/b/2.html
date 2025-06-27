@@ -2,95 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=340, initial-scale=1.0" />
-  <title>Live Classes</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+  <title>Student Classes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #eef3fb;
       margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f5f9;
       padding: 10px;
     }
+
     h2 {
       text-align: center;
-      margin-bottom: 15px;
-      color: #1976d2;
+      color: #1e88e5;
+      font-size: 1.3rem;
     }
-    .class-group {
-      margin-bottom: 25px;
-    }
+
     .class-label {
-      font-size: 1.1rem;
       font-weight: bold;
-      margin: 8px;
-      color: #1976d2;
+      margin: 10px 0 4px 6px;
+      color: #1e88e5;
     }
+
     .swiper {
       width: 100%;
-      max-width: 340px;
-      padding-bottom: 20px;
+      padding-bottom: 25px;
     }
+
     .swiper-slide {
-      background: white;
       width: 330px !important;
-      padding: 12px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border-top: 6px solid #1976d2;
-      text-align: left;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      padding: 14px;
+      border-top: 10px solid #1e88e5;
+      box-sizing: border-box;
     }
+
     .swiper-slide.live {
       border-top-color: #2e7d32;
     }
-    .class-img {
+
+    .subject-image {
       width: 100%;
-      height: 140px;
+      height: 120px;
       object-fit: cover;
-      border-radius: 6px;
-      margin-bottom: 8px;
+      border-radius: 10px;
     }
+
     .status {
       font-weight: bold;
-      margin-bottom: 6px;
-      color: #1976d2;
-      text-align: left;
+      margin-top: 10px;
+      color: #1e88e5;
     }
-    .status.red {
-      color: red;
-    }
+
     .live .status {
       color: #2e7d32;
     }
+
+    .started {
+      color: red;
+    }
+
     h3 {
-      margin: 4px 0;
+      margin: 8px 0 5px;
       font-size: 1.1rem;
+      text-align: left;
     }
+
     .meta {
-      font-size: 0.85rem;
-      color: #333;
-      margin: 4px 0;
+      font-size: 0.9rem;
+      color: #444;
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0 10px;
     }
+
     .btn {
       display: block;
-      margin-top: 8px;
-      padding: 8px;
+      margin-top: 10px;
       text-align: center;
-      font-weight: bold;
-      border-radius: 6px;
-      border: 2px solid #1976d2;
-      color: #1976d2;
-      text-decoration: none;
-    }
-    .live .btn {
-      border-color: #2e7d32;
-      color: #2e7d32;
-    }
-    .btn:hover {
-      background: #1976d2;
+      padding: 8px;
+      background: #1e88e5;
       color: white;
+      border-radius: 25px;
+      text-decoration: none;
+      font-size: 0.95rem;
     }
-    .live .btn:hover {
+
+    .live .btn {
       background: #2e7d32;
     }
   </style>
@@ -108,12 +109,17 @@
   const firebaseConfig = {
     apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
     authDomain: "edulearn-live-class-datasets.firebaseapp.com",
-    projectId: "edulearn-live-class-datasets"
+    projectId: "edulearn-live-class-datasets",
+    storageBucket: "edulearn-live-class-datasets.appspot.com",
+    messagingSenderId: "599551118203",
+    appId: "1:599551118203:web:0cfbde334243d3742dcbde",
+    measurementId: "G-JNZSP50J5N"
   };
+
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  const classLinks = {
+  const meetLinks = {
     "6": "https://meet.google.com/amf-mqim-buc",
     "7": "https://meet.google.com/jgi-dvhg-fuz",
     "8": "https://meet.google.com/gzi-obdg-oof",
@@ -126,77 +132,108 @@
   };
 
   const subjectImages = {
-    "botany": "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp",
-    "zoology": "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp",
-    "physics": "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp",
-    "chemistry": "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp",
-    "maths": "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp",
     "english": "https://thumbnail.allen.in/f99e56bd-fa3b-439a-af39-27a1f575e93b/original.webp",
-    "sst": "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp"
+    "sst": "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp",
+    "zoology": "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp",
+    "botany": "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp",
+    "math": "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp",
+    "physics": "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp",
+    "chemistry": "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp"
   };
 
-  function formatTime(dt) {
-    return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+  const container = document.getElementById("classContainer");
+  let swiperInstances = [];
 
-  function render(data) {
-    const now = new Date();
-    const grouped = {};
-    data.forEach(doc => {
-      const d = doc.data();
-      const start = d.start.toDate();
-      const end = d.end.toDate();
-      if (end <= now) return; // expired
-      if (!grouped[d.class]) grouped[d.class] = [];
-      grouped[d.class].push({ ...d, start, end });
-    });
-
-    const container = document.getElementById('classContainer');
+  const updateUI = (classes) => {
+    swiperInstances.forEach(s => s.destroy(true, true));
+    swiperInstances = [];
     container.innerHTML = '';
 
-    Object.entries(grouped).forEach(([cls, arr]) => {
-      const groupDiv = document.createElement('div');
-      groupDiv.className = 'class-group';
-      groupDiv.innerHTML = `<div class="class-label">Class ${cls}</div><div class="swiper"><div class="swiper-wrapper"></div><div class="swiper-pagination"></div></div>`;
+    const now = new Date();
+    const params = new URLSearchParams(location.search);
+    const filterClass = params.get("class");
+
+    const grouped = {};
+
+    classes.forEach(doc => {
+      const data = doc.data();
+      const start = new Date(data.start.seconds * 1000);
+      const end = new Date(data.end.seconds * 1000);
+
+      if (end < now) {
+        db.collection("classes").doc(doc.id).delete();
+        return;
+      }
+
+      if (filterClass && filterClass !== data.class) return;
+
+      if (!grouped[data.class]) grouped[data.class] = [];
+      grouped[data.class].push({ ...data, start, end });
+    });
+
+    for (const [cls, list] of Object.entries(grouped)) {
+      const groupDiv = document.createElement("div");
+      groupDiv.innerHTML = `<div class="class-label">Class ${cls}</div>
+        <div class="swiper"><div class="swiper-wrapper"></div><div class="swiper-pagination"></div></div>`;
       container.appendChild(groupDiv);
 
       const wrapper = groupDiv.querySelector('.swiper-wrapper');
-      arr.forEach(item => {
+
+      list.forEach(item => {
         const now = new Date();
         const isLive = now >= item.start && now <= item.end;
-        const minsTo = Math.floor((item.start - now)/60000);
-        const minsAgo = Math.floor((now - item.start)/60000);
-        let status = isLive
-          ? `Started ${minsAgo} min ago`
-          : (minsTo>0 && minsTo<=60)
-            ? `Starts in ${minsTo} min`
-            : formatTime(item.start);
-        const statusColor = isLive ? 'status red' : (minsTo <= 60 ? 'status' : 'status');
-        const slide = document.createElement('div');
-        slide.className = `swiper-slide${isLive?' live':''}`;
+        const diffMs = item.start - now;
+        const minUntil = Math.round(diffMs / 60000);
+        const sinceMin = Math.round((now - item.start) / 60000);
+        const isStarted = now >= item.start;
+        let statusText = '';
+
+        if (!isStarted && minUntil < 60) {
+          statusText = `Starts in ${minUntil} min`;
+        } else if (!isStarted) {
+          statusText = item.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else {
+          statusText = `<span class="started">Started ${sinceMin} min ago</span>`;
+        }
+
+        const imgURL = subjectImages[item.subject?.toLowerCase()] || '';
+
+        const slide = document.createElement("div");
+        slide.className = "swiper-slide" + (isLive ? " live" : "");
         slide.innerHTML = `
-          <img class="class-img" src="${subjectImages[item.subject.toLowerCase()]||''}" alt="${item.subject}">
-          <div class="${statusColor}">${status}</div>
+          <img src="${imgURL}" class="subject-image"/>
+          <div class="status">${isLive ? "LIVE" : "UPCOMING"} – ${statusText}</div>
           <h3>${item.title}</h3>
-          <div class="meta">Subject: ${item.subject}</div>
-          <div class="meta">🕒 ${formatTime(item.start)} - ${formatTime(item.end)}</div>
-          <a class="btn" ${isLive?`href="${classLinks[cls]}"`: 'style="pointer-events:none;opacity:0.5;"'}>${isLive?'Join Now':'Upcoming'}</a>
+          <div class="meta">
+            <span>${item.subject}</span>
+            <span>${Math.round((item.end - item.start) / 60000)} min</span>
+          </div>
+          <a class="btn" href="${isLive ? meetLinks[item.class] : '#'}" ${isLive ? '' : 'style="pointer-events:none;opacity:0.5;"'}>
+            ${isLive ? 'Join Now' : 'Scheduled'}
+          </a>
         `;
         wrapper.appendChild(slide);
       });
 
-      new Swiper(groupDiv.querySelector('.swiper'), {
+      const swiper = new Swiper(groupDiv.querySelector('.swiper'), {
         slidesPerView: 1,
-        spaceBetween: 12,
         pagination: { el: groupDiv.querySelector('.swiper-pagination'), clickable: true }
       });
-    });
-  }
+      swiperInstances.push(swiper);
+    }
+  };
 
-  db.collection('classes').orderBy('start').onSnapshot(snap => render(snap.docs));
+  db.collection("classes").orderBy("start")
+    .onSnapshot(snapshot => {
+      updateUI(snapshot.docs);
+    });
+
   setInterval(() => {
-    db.collection('classes').orderBy('start').get().then(snap => render(snap.docs));
-  }, 30000);
+    db.collection("classes").orderBy("start").get().then(snapshot => {
+      updateUI(snapshot.docs);
+    });
+  }, 60000);
 </script>
+
 </body>
 </html>
