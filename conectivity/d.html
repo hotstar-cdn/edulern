@@ -58,7 +58,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const classFilter = urlParams.get("class");
 
-    // Maintain timers for live update state switch
     const liveTimers = {};
     const endTimers = {};
 
@@ -72,13 +71,13 @@
       const isExpired = now > end;
 
       if (isExpired) {
-        // Remove card if exists
         const existing = document.getElementById(id);
         if (existing) existing.remove();
         return;
       }
 
-      if (classFilter && d.classGroup !== classFilter) return;
+      // ✅ Fix: Ensure filter works by string
+      if (classFilter && String(d.classGroup) !== String(classFilter)) return;
 
       let existingCard = document.getElementById(id);
 
@@ -107,13 +106,12 @@
         existingCard.innerHTML = cardHTML;
       }
 
-      // Setup timer to switch to "Live" state
+      // Timers for state update
       if (!isLive && !liveTimers[id]) {
         const msUntilLive = start.getTime() - now.getTime();
-        liveTimers[id] = setTimeout(() => renderClass(doc), msUntilLive + 1000); // add buffer
+        liveTimers[id] = setTimeout(() => renderClass(doc), msUntilLive + 1000);
       }
 
-      // Setup timer to remove after class ends
       if (!endTimers[id]) {
         const msUntilEnd = end.getTime() - now.getTime();
         endTimers[id] = setTimeout(() => {
