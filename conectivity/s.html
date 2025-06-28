@@ -2,23 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Live Classes</title>
+  <title>Live & Scheduled Classes</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .class-card { width: 330px; }
-    .scroll-wrapper::-webkit-scrollbar { display: none; }
+    .class-card {
+      width: 330px;
+      transition: 0.3s ease-in-out;
+    }
+    .scroll-wrapper::-webkit-scrollbar {
+      display: none;
+    }
+    .btn {
+      border-radius: 100px;
+    }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
+<body class="bg-gray-50 min-h-screen p-6">
   <div class="max-w-7xl mx-auto">
     <h1 class="text-3xl font-bold mb-6 text-blue-700">📚 Live / Scheduled Classes</h1>
     <div id="classContainer" class="flex flex-wrap gap-6 scroll-wrapper"></div>
   </div>
 
   <script>
-    // ✅ Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
       authDomain: "edulearn-live-class-datasets.firebaseapp.com",
@@ -71,42 +78,43 @@
       const isExpired = now > end;
 
       if (isExpired) {
-        const existing = document.getElementById(id);
-        if (existing) existing.remove();
+        document.getElementById(id)?.remove();
         return;
       }
 
-      // ✅ Fix: Ensure filter works by string
       if (classFilter && String(d.classGroup) !== String(classFilter)) return;
 
-      let existingCard = document.getElementById(id);
+      const title = d.title || "Untitled";
+      const subject = d.subject || "general";
+      const link = classLinks[d.classGroup] || "#";
 
+      const existingCard = document.getElementById(id);
       const cardHTML = `
-        <img src="${subjectImages[d.subject] || ''}" class="w-full h-40 object-cover" />
+        <img src="${subjectImages[subject] || ''}" class="w-full h-40 object-cover rounded-t-xl" />
         <div class="p-4">
-          <h3 class="text-lg font-semibold">${d.title}</h3>
-          <p class="text-sm text-gray-600 capitalize">${d.subject} • Class ${d.classGroup}</p>
+          <h3 class="text-lg font-semibold">${title}</h3>
+          <p class="text-sm text-gray-600 capitalize">${subject} • Class ${d.classGroup}</p>
           <p class="text-xs text-gray-500 mt-1">${start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
           <div class="mt-3 flex justify-between items-center">
-            <span class="text-sm font-bold ${isLive ? 'text-green-600' : 'text-blue-600'}">${isLive ? 'Live' : 'Upcoming'}</span>
-            <a href="${classLinks[d.classGroup]}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-full">
+            <span class="text-sm font-bold ${isLive ? 'text-green-600' : 'text-blue-600'}">${isLive ? 'Live' : 'Scheduled'}</span>
+            <a href="${isLive ? link : '#'}" target="_blank"
+              class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 btn">
               ${isLive ? 'Join Now' : 'Scheduled'}
             </a>
           </div>
-        </div>
-      `;
+        </div>`;
 
       if (!existingCard) {
         const card = document.createElement("div");
         card.id = id;
-        card.className = "bg-white rounded-xl class-card shadow-md border border-gray-200";
+        card.className = "bg-white rounded-xl shadow class-card border border-gray-200";
         card.innerHTML = cardHTML;
         container.appendChild(card);
       } else {
         existingCard.innerHTML = cardHTML;
       }
 
-      // Timers for state update
+      // Live transition
       if (!isLive && !liveTimers[id]) {
         const msUntilLive = start.getTime() - now.getTime();
         liveTimers[id] = setTimeout(() => renderClass(doc), msUntilLive + 1000);
@@ -115,8 +123,7 @@
       if (!endTimers[id]) {
         const msUntilEnd = end.getTime() - now.getTime();
         endTimers[id] = setTimeout(() => {
-          const expiredCard = document.getElementById(id);
-          if (expiredCard) expiredCard.remove();
+          document.getElementById(id)?.remove();
         }, msUntilEnd + 1000);
       }
     }
