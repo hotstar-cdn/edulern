@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Teacher Dashboard - My Classes</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-6xl mx-auto bg-white p-6 rounded shadow-md">
+    <h2 class="text-3xl font-semibold mb-4 text-blue-700">👩‍🏫 Teacher Dashboard</h2>
+
+    <table class="w-full table-auto border-collapse border border-gray-300 text-sm">
+      <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+        <tr>
+          <th class="border p-2">Title</th>
+          <th class="border p-2">Subject</th>
+          <th class="border p-2">Class</th>
+          <th class="border p-2">Start</th>
+          <th class="border p-2">End</th>
+          <th class="border p-2">Status</th>
+          <th class="border p-2">Action</th>
+        </tr>
+      </thead>
+      <tbody id="teacherClassList" class="text-gray-800"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // ✅ Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
+      authDomain: "edulearn-live-class-datasets.firebaseapp.com",
+      projectId: "edulearn-live-class-datasets",
+      storageBucket: "edulearn-live-class-datasets.firebasestorage.app",
+      messagingSenderId: "599551118203",
+      appId: "1:599551118203:web:0cfbde334243d3742dcbde",
+      measurementId: "G-JNZSP50J5N"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const tableBody = document.getElementById("teacherClassList");
+
+    // 🚨 Optionally: filter by teacher email/ID in future
+    db.collection("classes").orderBy("startTime", "desc").onSnapshot(snapshot => {
+      tableBody.innerHTML = "";
+      const now = new Date();
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const start = d.startTime.toDate();
+        const end = d.endTime.toDate();
+
+        let status = "Upcoming";
+        if (now >= start && now <= end) {
+          status = "Live";
+        } else if (now > end) {
+          status = "Expired";
+        }
+
+        const tr = document.createElement("tr");
+        tr.classList.add("hover:bg-gray-50");
+
+        tr.innerHTML = `
+          <td class="border p-2 font-medium">${d.title}</td>
+          <td class="border p-2 capitalize">${d.subject}</td>
+          <td class="border p-2">${d.classGroup}</td>
+          <td class="border p-2 text-sm">${start.toLocaleString()}</td>
+          <td class="border p-2 text-sm">${end.toLocaleString()}</td>
+          <td class="border p-2 font-semibold ${
+            status === "Live" ? "text-green-600" :
+            status === "Expired" ? "text-red-600" : "text-blue-600"
+          }">${status}</td>
+          <td class="border p-2">
+            <button onclick="deleteClass('${doc.id}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">
+              Delete
+            </button>
+          </td>
+        `;
+
+        tableBody.appendChild(tr);
+      });
+    });
+
+    function deleteClass(id) {
+      if (confirm("Are you sure you want to delete this class?")) {
+        db.collection("classes").doc(id).delete()
+          .then(() => alert("Class deleted."))
+          .catch(err => alert("Error: " + err.message));
+      }
+    }
+  </script>
+</body>
+</html>
