@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live Classes</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .class-card {
+      width: 330px;
+    }
+    .scroll-wrapper::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-blue-700">📚 Live / Scheduled Classes</h1>
+    <div id="classContainer" class="flex overflow-x-auto space-x-4 scroll-wrapper"></div>
+  </div>
+
+  <script>
+    // ✅ Firebase Setup
+    const firebaseConfig = {
+      apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
+      authDomain: "edulearn-live-class-datasets.firebaseapp.com",
+      projectId: "edulearn-live-class-datasets",
+      storageBucket: "edulearn-live-class-datasets.firebasestorage.app",
+      messagingSenderId: "599551118203",
+      appId: "1:599551118203:web:0cfbde334243d3742dcbde",
+      measurementId: "G-JNZSP50J5N"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const container = document.getElementById("classContainer");
+
+    // ✅ Join Links by class
+    const classLinks = {
+      "6": "https://meet.google.com/amf-mqim-buc",
+      "7": "https://meet.google.com/jgi-dvhg-fuz",
+      "8": "https://meet.google.com/gzi-obdg-oof",
+      "9": "https://meet.google.com/mgz-qfbe-rzg",
+      "10": "https://meet.google.com/tkk-npnb-sgm",
+      "11NEET": "https://meet.google.com/uia-pzmj-qvq",
+      "11JEE": "https://meet.google.com/asi-zwyg-zto",
+      "12NEET": "https://meet.google.com/dbx-azvv-qon",
+      "12JEE": "https://meet.google.com/xxv-uoir-rio"
+    };
+
+    const subjectImages = {
+      botany: "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp",
+      zoology: "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp",
+      physics: "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp",
+      chemistry: "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp",
+      maths: "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp",
+      english: "https://thumbnail.allen.in/f99e56bd-fa3b-439a-af39-27a1f575e93b/original.webp",
+      sst: "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp"
+    };
+
+    // ✅ Get class filter from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const classFilter = urlParams.get("class");
+
+    db.collection("classes").orderBy("startTime", "asc").onSnapshot(snapshot => {
+      container.innerHTML = "";
+      const now = new Date();
+
+      const classMap = {}; // for carousel logic
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const start = d.startTime.toDate();
+        const end = d.endTime.toDate();
+        const current = now >= start && now <= end;
+        const expired = now > end;
+
+        // ✅ Skip expired classes
+        if (expired) return;
+
+        // ✅ Filter class if needed
+        if (classFilter && d.classGroup !== classFilter) return;
+
+        const status = current ? "Live" : "Upcoming";
+        const joinText = current ? "Join Now" : "Scheduled";
+        const joinLink = classLinks[d.classGroup] || "#";
+
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-xl class-card shadow-md overflow-hidden flex-shrink-0 border border-gray-200";
+
+        card.innerHTML = `
+          <img src="${subjectImages[d.subject] || ''}" alt="${d.subject}" class="w-full h-40 object-cover" />
+          <div class="p-4">
+            <h3 class="text-lg font-semibold">${d.title}</h3>
+            <p class="text-sm text-gray-600 capitalize">${d.subject} • Class ${d.classGroup}</p>
+            <p class="text-xs text-gray-500 mt-1">${start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+            <div class="mt-3 flex justify-between items-center">
+              <span class="text-sm font-bold ${
+                current ? 'text-green-600' : 'text-blue-500'
+              }">${status}</span>
+              <a href="${joinLink}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-full">${joinText}</a>
+            </div>
+          </div>
+        `;
+
+        // ✅ Group by class for carousel if needed
+        if (!classMap[d.classGroup]) {
+          classMap[d.classGroup] = [];
+        }
+        classMap[d.classGroup].push(card);
+      });
+
+      // ✅ Append to DOM
+      for (let group in classMap) {
+        const scrollBox = document.createElement("div");
+        scrollBox.className = "flex space-x-4 mb-6 overflow-x-auto scroll-wrapper";
+        classMap[group].forEach(c => scrollBox.appendChild(c));
+
+        container.appendChild(scrollBox);
+      }
+    });
+  </script>
+</body>
+</html>
