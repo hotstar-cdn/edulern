@@ -1,202 +1,117 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=340, initial-scale=1.0" />
-  <title>Live Classes</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+  <meta charset="UTF-8">
+  <title>Live Class Viewer</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eef3fb;
-      margin: 0;
-      padding: 10px;
+    .glass {
+      backdrop-filter: blur(6px);
+      background-color: rgba(0, 0, 0, 0.4);
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 15px;
-      color: #1976d2;
-    }
-    .class-group {
-      margin-bottom: 25px;
-    }
-    .class-label {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin: 8px;
-      color: #1976d2;
-    }
-    .swiper {
-      width: 100%;
-      max-width: 340px;
-      padding-bottom: 20px;
-    }
-    .swiper-slide {
-      background: white;
-      width: 330px !important;
-      padding: 12px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border-top: 6px solid #1976d2;
-      text-align: left;
-    }
-    .swiper-slide.live {
-      border-top-color: #2e7d32;
-    }
-    .class-img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-bottom: 8px;
-    }
-    .status {
-      font-weight: bold;
-      margin-bottom: 6px;
-      color: #1976d2;
-      text-align: left;
-    }
-    .status.red {
-      color: red;
-    }
-    .live .status {
-      color: #2e7d32;
-    }
-    h3 {
-      margin: 4px 0;
-      font-size: 1.1rem;
-    }
-    .meta {
-      font-size: 0.85rem;
-      color: #333;
-      margin: 4px 0;
-    }
-    .btn {
-      display: block;
-      margin-top: 8px;
-      padding: 8px;
-      text-align: center;
-      font-weight: bold;
-      border-radius: 6px;
-      border: 2px solid #1976d2;
-      color: #1976d2;
-      text-decoration: none;
-    }
-    .live .btn {
-      border-color: #2e7d32;
-      color: #2e7d32;
-    }
-    .btn:hover {
-      background: #1976d2;
-      color: white;
-    }
-    .live .btn:hover {
-      background: #2e7d32;
+    .pill-button {
+      border-radius: 100px !important;
     }
   </style>
 </head>
-<body>
+<body class="bg-gray-100 p-4">
+  <h2 class="text-xl font-semibold mb-4">Live Class Carousel</h2>
+  <div id="classContainer" class="flex gap-4 overflow-x-auto pb-4"></div>
 
-<h2>Live & Upcoming Classes</h2>
-<div id="classContainer"></div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
+      authDomain: "edulearn-live-class-datasets.firebaseapp.com",
+      projectId: "edulearn-live-class-datasets",
+      storageBucket: "edulearn-live-class-datasets.firebasestorage.app",
+      messagingSenderId: "599551118203",
+      appId: "1:599551118203:web:0cfbde334243d3742dcbde",
+      measurementId: "G-JNZSP50J5N"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    const subjectImages = {
+      botany: "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp",
+      zoology: "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp",
+      physics: "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp",
+      chemistry: "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp",
+      maths: "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp",
+      english: "https://thumbnail.allen.in/f99e56bd-fa3b-439a-af39-27a1f575e93b/original.webp",
+      sst: "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp"
+    };
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
-    authDomain: "edulearn-live-class-datasets.firebaseapp.com",
-    projectId: "edulearn-live-class-datasets"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+    const joinLinks = {
+      "6": "https://meet.google.com/amf-mqim-buc",
+      "7": "https://meet.google.com/jgi-dvhg-fuz",
+      "8": "https://meet.google.com/gzi-obdg-oof",
+      "9": "https://meet.google.com/mgz-qfbe-rzg",
+      "10": "https://meet.google.com/tkk-npnb-sgm",
+      "11NEET": "https://meet.google.com/uia-pzmj-qvq",
+      "11JEE": "https://meet.google.com/asi-zwyg-zto",
+      "12NEET": "https://meet.google.com/dbx-azvv-qon",
+      "12JEE": "https://meet.google.com/xxv-uoir-rio"
+    };
 
-  const classLinks = {
-    "6": "https://meet.google.com/amf-mqim-buc",
-    "7": "https://meet.google.com/jgi-dvhg-fuz",
-    "8": "https://meet.google.com/gzi-obdg-oof",
-    "9": "https://meet.google.com/mgz-qfbe-rzg",
-    "10": "https://meet.google.com/tkk-npnb-sgm",
-    "11NEET": "https://meet.google.com/uia-pzmj-qvq",
-    "11JEE": "https://meet.google.com/asi-zwyg-zto",
-    "12NEET": "https://meet.google.com/dbx-azvv-qon",
-    "12JEE": "https://meet.google.com/xxv-uoir-rio"
-  };
+    const urlParams = new URLSearchParams(window.location.search);
+    const classFilter = urlParams.get("class");
 
-  const subjectImages = {
-    "botany": "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp",
-    "zoology": "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp",
-    "physics": "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp",
-    "chemistry": "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp",
-    "maths": "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp",
-    "english": "https://thumbnail.allen.in/f99e56bd-fa3b-439a-af39-27a1f575e93b/original.webp",
-    "sst": "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp"
-  };
+    function renderClassCard(id, data, now) {
+      const start = data.startTime.toDate();
+      const end = data.endTime.toDate();
+      const isLive = now >= start && now <= end;
+      const isExpired = now > end;
+      if (isExpired) {
+        db.collection("classes").doc(id).delete();
+        return null;
+      }
 
-  function formatTime(dt) {
-    return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+      const minsUntil = Math.ceil((start - now) / 60000);
+      const minsAgo = Math.floor((now - start) / 60000);
+      const image = subjectImages[data.subject] || "";
+      const joinUrl = joinLinks[data.classGroup] || "#";
 
-  function render(data) {
-    const now = new Date();
-    const grouped = {};
-    data.forEach(doc => {
-      const d = doc.data();
-      const start = d.start.toDate();
-      const end = d.end.toDate();
-      if (end <= now) return; // expired
-      if (!grouped[d.class]) grouped[d.class] = [];
-      grouped[d.class].push({ ...d, start, end });
-    });
+      return `
+        <div class="w-[330px] bg-white rounded-lg shadow flex-shrink-0 overflow-hidden">
+          <div class="relative">
+            <img src="${image}" class="w-full h-44 object-cover rounded-t-lg" />
+            <div class="absolute top-2 left-2 glass text-white text-xs px-2 py-[2px] rounded">
+              ${data.subject.toUpperCase()}
+            </div>
+            ${isLive ? `<div class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-[2px] rounded">LIVE</div>` : ""}
+          </div>
+          <div class="p-4">
+            <div class="font-bold text-lg truncate">${data.title}</div>
+            <div class="text-sm text-gray-600 mb-1">${data.topic || 'Topic'}</div>
+            <div class="text-sm text-red-600 mb-3">
+              ⏱️ ${isLive ? `Started ${minsAgo} mins ago` : `Starts in ${minsUntil} mins`}
+            </div>
+            <a href="${joinUrl}" target="_blank">
+              <button class="w-full border border-black py-2 font-semibold text-sm pill-button hover:bg-black hover:text-white transition">
+                ${isLive ? "Join Now" : "Scheduled"}
+              </button>
+            </a>
+          </div>
+        </div>
+      `;
+    }
 
-    const container = document.getElementById('classContainer');
-    container.innerHTML = '';
+    db.collection("classes").onSnapshot(snapshot => {
+      const container = document.getElementById("classContainer");
+      const now = new Date();
+      container.innerHTML = "";
 
-    Object.entries(grouped).forEach(([cls, arr]) => {
-      const groupDiv = document.createElement('div');
-      groupDiv.className = 'class-group';
-      groupDiv.innerHTML = `<div class="class-label">Class ${cls}</div><div class="swiper"><div class="swiper-wrapper"></div><div class="swiper-pagination"></div></div>`;
-      container.appendChild(groupDiv);
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (classFilter && classFilter !== data.classGroup) return;
 
-      const wrapper = groupDiv.querySelector('.swiper-wrapper');
-      arr.forEach(item => {
-        const now = new Date();
-        const isLive = now >= item.start && now <= item.end;
-        const minsTo = Math.floor((item.start - now)/60000);
-        const minsAgo = Math.floor((now - item.start)/60000);
-        let status = isLive
-          ? `Started ${minsAgo} min ago`
-          : (minsTo>0 && minsTo<=60)
-            ? `Starts in ${minsTo} min`
-            : formatTime(item.start);
-        const statusColor = isLive ? 'status red' : (minsTo <= 60 ? 'status' : 'status');
-        const slide = document.createElement('div');
-        slide.className = `swiper-slide${isLive?' live':''}`;
-        slide.innerHTML = `
-          <img class="class-img" src="${subjectImages[item.subject.toLowerCase()]||''}" alt="${item.subject}">
-          <div class="${statusColor}">${status}</div>
-          <h3>${item.title}</h3>
-          <div class="meta">Subject: ${item.subject}</div>
-          <div class="meta">🕒 ${formatTime(item.start)} - ${formatTime(item.end)}</div>
-          <a class="btn" ${isLive?`href="${classLinks[cls]}"`: 'style="pointer-events:none;opacity:0.5;"'}>${isLive?'Join Now':'Upcoming'}</a>
-        `;
-        wrapper.appendChild(slide);
+        const cardHtml = renderClassCard(doc.id, data, now);
+        if (cardHtml) container.innerHTML += cardHtml;
       });
-
-      new Swiper(groupDiv.querySelector('.swiper'), {
-        slidesPerView: 1,
-        spaceBetween: 12,
-        pagination: { el: groupDiv.querySelector('.swiper-pagination'), clickable: true }
-      });
     });
-  }
-
-  db.collection('classes').orderBy('start').onSnapshot(snap => render(snap.docs));
-  setInterval(() => {
-    db.collection('classes').orderBy('start').get().then(snap => render(snap.docs));
-  }, 30000);
-</script>
+  </script>
 </body>
 </html>
