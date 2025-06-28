@@ -2,125 +2,127 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Teacher | Schedule Class</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f4f7;
-      display: flex;
-      justify-content: center;
-      padding: 30px 10px;
-    }
-    form {
-      background: white;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 100%;
-    }
-    h2 {
-      text-align: center;
-      color: #1976d2;
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    input, select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #155a9c;
-    }
-  </style>
+  <title>Schedule Class</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <form id="scheduleForm">
-    <h2>Schedule Class</h2>
-    <label for="class">Class</label>
-    <select id="class" required>
-      <option value="">-- Select Class --</option>
-      <option value="6">6</option>
-      <option value="7">7</option>
-      <option value="8">8</option>
-      <option value="9">9</option>
-      <option value="10">10</option>
-      <option value="11NEET">11 NEET</option>
-      <option value="11JEE">11 JEE</option>
-      <option value="12NEET">12 NEET</option>
-      <option value="12JEE">12 JEE</option>
-    </select>
-    <label for="subject">Subject</label>
-    <select id="subject" required>
-      <option value="">-- Select Subject --</option>
-      <option value="English">English</option>
-      <option value="SST">SST</option>
-      <option value="Botany">Botany</option>
-      <option value="Zoology">Zoology</option>
-      <option value="Maths">Maths</option>
-      <option value="Physics">Physics</option>
-      <option value="Chemistry">Chemistry</option>
-    </select>
-    <label for="title">Title</label>
-    <input type="text" id="title" placeholder="Class Title" required />
-    <label for="start">Start Time</label>
-    <input type="datetime-local" id="start" required />
-    <label for="end">End Time</label>
-    <input type="datetime-local" id="end" required />
-    <button type="submit">Schedule</button>
-  </form>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white shadow-xl rounded-lg p-6 w-[400px]">
+    <h2 class="text-2xl font-semibold mb-4">Schedule New Class</h2>
+    
+    <div class="mb-4 text-center">
+      <img id="subjectImage" src="" class="w-full h-40 object-cover rounded hidden" />
+    </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <form id="classForm" class="space-y-4">
+      <input type="text" id="title" placeholder="Class Title" required class="w-full p-3 border rounded" />
+
+      <select id="subject" required class="w-full p-3 border rounded">
+        <option value="">Select Subject</option>
+        <option value="botany">Botany</option>
+        <option value="zoology">Zoology</option>
+        <option value="physics">Physics</option>
+        <option value="chemistry">Chemistry</option>
+        <option value="maths">Maths</option>
+        <option value="english">English</option>
+        <option value="sst">SST</option>
+      </select>
+
+      <select id="classGroup" required class="w-full p-3 border rounded">
+        <option value="">Select Class</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11NEET">11 NEET</option>
+        <option value="11JEE">11 JEE</option>
+        <option value="12NEET">12 NEET</option>
+        <option value="12JEE">12 JEE</option>
+      </select>
+
+      <input type="datetime-local" id="startTime" required class="w-full p-3 border rounded" />
+      <input type="datetime-local" id="endTime" required class="w-full p-3 border rounded" />
+
+      <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700">
+        Schedule Class
+      </button>
+    </form>
+  </div>
+
   <script>
+    // ✅ Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCbnM2-F_MgLKFm6qt4zAOQ8czPzQY0Koc",
       authDomain: "edulearn-live-class-datasets.firebaseapp.com",
       projectId: "edulearn-live-class-datasets",
       storageBucket: "edulearn-live-class-datasets.firebasestorage.app",
       messagingSenderId: "599551118203",
-      appId: "1:599551118203:web:0cfbde334243d3742dcbde"
+      appId: "1:599551118203:web:0cfbde334243d3742dcbde",
+      measurementId: "G-JNZSP50J5N"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    document.getElementById('scheduleForm').addEventListener('submit', async e => {
+    // ✅ Subject Image Map
+    const subjectImages = {
+      botany: "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp",
+      zoology: "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp",
+      physics: "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp",
+      chemistry: "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp",
+      maths: "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp",
+      english: "https://thumbnail.allen.in/f99e56bd-fa3b-439a-af39-27a1f575e93b/original.webp",
+      sst: "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp"
+    };
+
+    // ✅ Show Subject Image
+    const subjectSelect = document.getElementById('subject');
+    const imageEl = document.getElementById('subjectImage');
+    subjectSelect.addEventListener('change', () => {
+      const img = subjectImages[subjectSelect.value];
+      if (img) {
+        imageEl.src = img;
+        imageEl.classList.remove('hidden');
+      } else {
+        imageEl.classList.add('hidden');
+      }
+    });
+
+    // ✅ Form Submission
+    document.getElementById('classForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const cls = document.getElementById('class').value;
-      const subject = document.getElementById('subject').value;
-      const title = document.getElementById('title').value;
-      const start = new Date(document.getElementById('start').value);
-      const end = new Date(document.getElementById('end').value);
-      if (end <= start) return alert('End must be after start');
-      await db.collection('classes').add({
-        class: cls,
-        subject,
-        title,
-        start: firebase.firestore.Timestamp.fromDate(start),
-        end: firebase.firestore.Timestamp.fromDate(end)
-      });
-      alert('Class scheduled!');
-      e.target.reset();
+
+      const title = document.getElementById('title').value.trim();
+      const subject = subjectSelect.value;
+      const classGroup = document.getElementById('classGroup').value;
+      const startTime = new Date(document.getElementById('startTime').value);
+      const endTime = new Date(document.getElementById('endTime').value);
+
+      if (endTime <= startTime) {
+        alert("End time must be after start time.");
+        return;
+      }
+
+      const duration = (endTime - startTime) / (1000 * 60); // in minutes
+
+      try {
+        await db.collection("classes").add({
+          title,
+          subject,
+          classGroup,
+          startTime: firebase.firestore.Timestamp.fromDate(startTime),
+          endTime: firebase.firestore.Timestamp.fromDate(endTime),
+          duration,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert("Class scheduled successfully!");
+        e.target.reset();
+        imageEl.classList.add('hidden');
+      } catch (error) {
+        console.error("Error adding class:", error);
+        alert("Failed to schedule class.");
+      }
     });
   </script>
 </body>
