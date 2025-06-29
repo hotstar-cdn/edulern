@@ -1,82 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Test Results</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Review Answers</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f2f4fb;
       margin: 0;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f5fb;
     }
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
+    header {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      background: #fff;
+      font-weight: bold;
+      font-size: 1.2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .controls {
+      padding: 1rem;
+      background: #fff;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .tab-bar {
+      display: flex;
+      border-bottom: 2px solid #ddd;
+      background: #fff;
+    }
+    .tab-bar div {
+      padding: 0.8rem 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+    }
+    .tab-bar div.active {
+      border-bottom: 3px solid #007bff;
+      color: #007bff;
     }
     .question {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .answer {
-      padding: 10px;
+      margin: 1rem;
+      background: #fff;
       border-radius: 10px;
-      margin: 5px 0;
+      padding: 1rem;
     }
-    .correct {
-      background-color: #e0ffe0;
-      color: #0a0;
+    .easy {
+      background: #d4f8e8;
+      color: green;
+      padding: 0.2rem 0.6rem;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      display: inline-block;
     }
-    .wrong {
-      background-color: #ffe2e2;
-      color: #c00;
-    }
-    h1 {
-      color: #333;
+    .view {
+      color: #007bff;
+      text-align: center;
+      margin-top: 1rem;
+      display: block;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+  <header>← Review Answers</header>
 
-<h1>📊 Test Results</h1>
-<div id="results"></div>
+  <div class="controls">
+    <button>Filter</button>
+    <button>Physics</button>
+  </div>
 
-<script src="data.js"></script>
-<script>
-  const resultsContainer = document.getElementById('results');
-  const wrongAnswers = JSON.parse(localStorage.getItem('wrongAnswers') || '{}');
-  const urlParams = new URLSearchParams(window.location.search);
-  const testCode = urlParams.get('test');
+  <div class="tab-bar">
+    <div class="active">Unattempted(10)</div>
+    <div>Incorrect(0)</div>
+    <div>Correct(0)</div>
+  </div>
 
-  if (!testCode || !testData[testCode]) {
-    resultsContainer.innerHTML = "<p>Invalid test code or no data available.</p>";
-  } else {
-    const subject = testData[testCode].subject;
-    const questions = testData[testCode].questions;
-    const storedAnswers = wrongAnswers[testCode] || [];
+  <div class="question">
+    <h3>Question 1 <span class="easy">EASY</span></h3>
+    <p>A man stands in front of a hillock and fires a gun...</p>
+    <a class="view">View solution</a>
+  </div>
 
-    resultsContainer.innerHTML += `<h2>${subject} – ${testCode}</h2>`;
-
-    questions.forEach((q, i) => {
-      const selectedInput = document.querySelector(`input[name="q${i}"]:checked`);
-      const userWrong = storedAnswers.find(w => w.question === q.question);
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="question">Q${i + 1}: ${q.question}</div>
-        ${userWrong ? `
-          <div class="answer wrong">❌ Your Answer: ${userWrong.yourAnswer || "Not Answered"}</div>
-          <div class="answer correct">✅ Correct Answer: ${userWrong.correctAnswer}</div>
-        ` : `
-          <div class="answer correct">✅ Correct Answer: ${q.answer}</div>
-        `}
-      `;
-      resultsContainer.appendChild(card);
-    });
-  }
-</script>
+  <div class="question">
+    <h3>Question 2 <span class="easy">EASY</span></h3>
+    <p>For given wave intensity ratio is (I1/I2)</p>
+    <img src="wave.png" alt="Wave" width="100%" />
+    <a class="view">View solution</a>
+  </div>
 </body>
 </html>
