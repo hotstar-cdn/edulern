@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Results</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f4fb;
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    .question {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .answer {
+      padding: 10px;
+      border-radius: 10px;
+      margin: 5px 0;
+    }
+    .correct {
+      background-color: #e0ffe0;
+      color: #0a0;
+    }
+    .wrong {
+      background-color: #ffe2e2;
+      color: #c00;
+    }
+    h1 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📊 Test Results</h1>
+<div id="results"></div>
+
+<script src="data.js"></script>
+<script>
+  const resultsContainer = document.getElementById('results');
+  const wrongAnswers = JSON.parse(localStorage.getItem('wrongAnswers') || '{}');
+  const urlParams = new URLSearchParams(window.location.search);
+  const testCode = urlParams.get('test');
+
+  if (!testCode || !testData[testCode]) {
+    resultsContainer.innerHTML = "<p>Invalid test code or no data available.</p>";
+  } else {
+    const subject = testData[testCode].subject;
+    const questions = testData[testCode].questions;
+    const storedAnswers = wrongAnswers[testCode] || [];
+
+    resultsContainer.innerHTML += `<h2>${subject} – ${testCode}</h2>`;
+
+    questions.forEach((q, i) => {
+      const selectedInput = document.querySelector(`input[name="q${i}"]:checked`);
+      const userWrong = storedAnswers.find(w => w.question === q.question);
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="question">Q${i + 1}: ${q.question}</div>
+        ${userWrong ? `
+          <div class="answer wrong">❌ Your Answer: ${userWrong.yourAnswer || "Not Answered"}</div>
+          <div class="answer correct">✅ Correct Answer: ${userWrong.correctAnswer}</div>
+        ` : `
+          <div class="answer correct">✅ Correct Answer: ${q.answer}</div>
+        `}
+      `;
+      resultsContainer.appendChild(card);
+    });
+  }
+</script>
+</body>
+</html>
