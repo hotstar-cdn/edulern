@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Review Wrong Answers</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f2f4fb;
+      padding: 20px;
+      margin: 0;
+    }
+    h2 {
+      color: #444;
+      margin-top: 30px;
+    }
+    .card {
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .question {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .answer {
+      margin: 4px 0;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .wrong {
+      background-color: #ffe2e2;
+      color: #c00;
+    }
+    .correct {
+      background-color: #e0ffe0;
+      color: #0a0;
+    }
+    .test-header {
+      font-size: 20px;
+      color: #333;
+      margin: 30px 0 10px;
+      border-left: 5px solid #a259ff;
+      padding-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📝 Your Wrong Answers</h1>
+<div id="review"></div>
+
+<script>
+  const reviewContainer = document.getElementById('review');
+  const wrongAnswers = JSON.parse(localStorage.getItem('wrongAnswers') || '{}');
+
+  if (Object.keys(wrongAnswers).length === 0) {
+    reviewContainer.innerHTML = "<p>No wrong answers found. Well done! 🎉</p>";
+  } else {
+    for (const [testCode, wrongList] of Object.entries(wrongAnswers)) {
+      if (wrongList.length === 0) continue;
+
+      const testHeader = document.createElement("div");
+      testHeader.className = "test-header";
+      testHeader.textContent = `📘 ${testCode} - ${wrongList[0]?.subject || ''}`;
+      reviewContainer.appendChild(testHeader);
+
+      wrongList.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="question">Q${index + 1}: ${item.question}</div>
+          <div class="answer wrong">❌ Your Answer: ${item.yourAnswer || "Not Answered"}</div>
+          <div class="answer correct">✅ Correct Answer: ${item.correctAnswer}</div>
+        `;
+        reviewContainer.appendChild(card);
+      });
+    }
+  }
+</script>
+
+</body>
+</html>
