@@ -1,184 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Quiz</title>
+  <meta charset="UTF-8" />
+  <title>Test</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
+      margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: #f2f4fb;
-      padding: 20px;
+      background: #edf0fb;
+      overflow-x: hidden;
+    }
+    .container {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
     }
     .card {
-      max-width: 500px;
-      margin: auto;
+      flex: 0 0 100%;
+      scroll-snap-align: center;
       background: white;
-      border-radius: 20px;
+      margin: 0 auto;
       padding: 20px;
-      position: relative;
+      border-radius: 20px;
+      margin-top: 30px;
+      max-width: 90%;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .subject {
-      background-color: #a259ff;
-      color: white;
-      font-size: 14px;
-      padding: 6px 12px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .question-number {
-      background: #e4e6f1;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-    }
-    .close-btn {
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .question-text {
-      margin: 20px 0;
-      font-size: 18px;
-    }
-    .options label {
-      display: block;
-      background: #eee;
-      border-radius: 10px;
-      padding: 12px;
-      margin: 10px 0;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .options input[type="radio"] {
-      display: none;
-    }
-    .nav-buttons {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .nav-buttons button {
-      padding: 10px 20px;
-      margin: 0 5px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
+    .subject-badge {
       background: #a259ff;
       color: white;
+      padding: 6px 12px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+    .question {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .options label {
+      background: #efefef;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      display: block;
       cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+    .options label.selected {
+      background: #ded6ff;
+      border: 2px solid #a259ff;
+    }
+    .centered-circle {
+      background: #e3e6f5;
+      color: #333;
+      font-weight: bold;
+      text-align: center;
+      width: 48px;
+      height: 48px;
+      line-height: 48px;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+    }
+    .nav {
+      text-align: center;
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      background: #a259ff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
 
-<div id="quiz"></div>
-<div class="nav-buttons">
-  <button id="prev">← Prev</button>
-  <button id="next">Next →</button>
-  <button id="submit">Submit</button>
+<div id="app">
+  <div class="container" id="questionContainer"></div>
+  <div class="nav">
+    <button id="submitBtn">Submit Test</button>
+  </div>
 </div>
 
 <script src="data.js"></script>
 <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const testCode = urlParams.get('test');
-
-  const quizContainer = document.getElementById('quiz');
-  let currentIndex = 0;
+  const params = new URLSearchParams(window.location.search);
+  const testCode = params.get("test");
+  const container = document.getElementById("questionContainer");
+  const submitBtn = document.getElementById("submitBtn");
 
   if (!testCode || !testData[testCode]) {
-    quizContainer.innerHTML = "<h2>Invalid or missing test code!</h2>";
-  } else {
-    const questions = testData[testCode].questions;
-    const subject = testData[testCode].subject;
-
-    function renderQuestion(index) {
-      quizContainer.innerHTML = '';
-      const q = questions[index];
-
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div class="header">
-          <div class="subject">🔬 ${subject}</div>
-          <div class="question-number">${index + 1}</div>
-          <div class="close-btn" onclick="window.history.back()">✕</div>
-        </div>
-        <div class="question-text">${q.question}</div>
-        <div class="options">
-          ${q.options.map((opt, i) => `
-            <label>
-              <input type="radio" name="q${index}" value="${opt}">
-              <strong>${String.fromCharCode(65 + i)}:</strong> ${opt}
-            </label>
-          `).join('')}
-        </div>
-      `;
-      quizContainer.appendChild(card);
-    }
-
-    function submitAnswers() {
-      const wrongAnswers = [];
-
-      questions.forEach((q, i) => {
-        const selected = document.querySelector(`input[name="q${i}"]:checked`);
-        const answer = selected ? selected.value : null;
-        if (answer !== q.answer) {
-          wrongAnswers.push({
-            subject,
-            question: q.question,
-            yourAnswer: answer,
-            correctAnswer: q.answer
-          });
-        }
-      });
-
-      let allWrong = JSON.parse(localStorage.getItem('wrongAnswers') || '{}');
-      if (!allWrong[testCode]) allWrong[testCode] = [];
-      allWrong[testCode] = allWrong[testCode].concat(wrongAnswers);
-      localStorage.setItem('wrongAnswers', JSON.stringify(allWrong));
-
-      window.location.href = "2.html";
-    }
-
-    document.getElementById('next').onclick = () => {
-      if (currentIndex < questions.length - 1) {
-        currentIndex++;
-        renderQuestion(currentIndex);
-      }
-    };
-
-    document.getElementById('prev').onclick = () => {
-      if (currentIndex > 0) {
-        currentIndex--;
-        renderQuestion(currentIndex);
-      }
-    };
-
-    document.getElementById('submit').onclick = submitAnswers;
-
-    renderQuestion(currentIndex);
+    container.innerHTML = "<p style='padding: 20px'>Invalid or missing test code.</p>";
+    submitBtn.disabled = true;
+    throw new Error("Invalid test code");
   }
 
-  // Optional: Swipe gestures for mobile
-  let touchStartX = 0;
-  document.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
-  document.addEventListener('touchend', e => {
-    let diff = e.changedTouches[0].screenX - touchStartX;
-    if (diff > 50) document.getElementById('prev').click();
-    else if (diff < -50) document.getElementById('next').click();
+  const test = testData[testCode];
+  const questions = test.questions;
+  const selectedAnswers = {};
+
+  questions.forEach((q, index) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="centered-circle">${index + 1}</div>
+      <div class="subject-badge">🔬 ${test.subject}</div>
+      <div class="question">${q.question}</div>
+      <div class="options">
+        ${q.options.map((opt, i) => `
+          <label>
+            <input type="radio" name="q${index}" value="${opt}" onchange="handleSelect(${index}, this)" hidden />
+            ${String.fromCharCode(65 + i)}: ${opt}
+          </label>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(card);
   });
+
+  function handleSelect(index, input) {
+    selectedAnswers[index] = input.value;
+    const labels = input.closest('.options').querySelectorAll('label');
+    labels.forEach(label => label.classList.remove('selected'));
+    input.parentElement.classList.add('selected');
+  }
+
+  submitBtn.onclick = () => {
+    const wrongAnswers = [];
+    questions.forEach((q, index) => {
+      const selected = selectedAnswers[index];
+      if (selected !== q.answer) {
+        wrongAnswers.push({
+          question: q.question,
+          yourAnswer: selected || null,
+          correctAnswer: q.answer,
+          subject: test.subject
+        });
+      }
+    });
+
+    const existing = JSON.parse(localStorage.getItem("wrongAnswers") || "{}");
+    existing[testCode] = wrongAnswers;
+    localStorage.setItem("wrongAnswers", JSON.stringify(existing));
+
+    window.location.href = `2.html?test=${testCode}`;
+  };
 </script>
+
 </body>
 </html>
