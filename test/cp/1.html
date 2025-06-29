@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f4fb;
+      padding: 20px;
+    }
+    .card {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .subject {
+      background-color: #a259ff;
+      color: white;
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .question-number {
+      background: #e4e6f1;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .close-btn {
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .question-text {
+      margin: 20px 0;
+      font-size: 18px;
+    }
+    .options label {
+      display: block;
+      background: #eee;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px 0;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .options input[type="radio"] {
+      display: none;
+    }
+    .nav-buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .nav-buttons button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      background: #a259ff;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div id="quiz"></div>
+<div class="nav-buttons">
+  <button id="prev">← Prev</button>
+  <button id="next">Next →</button>
+  <button id="submit">Submit</button>
+</div>
+
+<script src="data.js"></script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const testCode = urlParams.get('test');
+
+  const quizContainer = document.getElementById('quiz');
+  let currentIndex = 0;
+
+  if (!testCode || !testData[testCode]) {
+    quizContainer.innerHTML = "<h2>Invalid or missing test code!</h2>";
+  } else {
+    const questions = testData[testCode].questions;
+    const subject = testData[testCode].subject;
+
+    function renderQuestion(index) {
+      quizContainer.innerHTML = '';
+      const q = questions[index];
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="header">
+          <div class="subject">🔬 ${subject}</div>
+          <div class="question-number">${index + 1}</div>
+          <div class="close-btn" onclick="window.history.back()">✕</div>
+        </div>
+        <div class="question-text">${q.question}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => `
+            <label>
+              <input type="radio" name="q${index}" value="${opt}">
+              <strong>${String.fromCharCode(65 + i)}:</strong> ${opt}
+            </label>
+          `).join('')}
+        </div>
+      `;
+      quizContainer.appendChild(card);
+    }
+
+    function submitAnswers() {
+      const wrongAnswers = [];
+
+      questions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        const answer = selected ? selected.value : null;
+        if (answer !== q.answer) {
+          wrongAnswers.push({
+            subject,
+            question: q.question,
+            yourAnswer: answer,
+            correctAnswer: q.answer
+          });
+        }
+      });
+
+      let allWrong = JSON.parse(localStorage.getItem('wrongAnswers') || '{}');
+      if (!allWrong[testCode]) allWrong[testCode] = [];
+      allWrong[testCode] = allWrong[testCode].concat(wrongAnswers);
+      localStorage.setItem('wrongAnswers', JSON.stringify(allWrong));
+
+      window.location.href = "2.html";
+    }
+
+    document.getElementById('next').onclick = () => {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        renderQuestion(currentIndex);
+      }
+    };
+
+    document.getElementById('prev').onclick = () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion(currentIndex);
+      }
+    };
+
+    document.getElementById('submit').onclick = submitAnswers;
+
+    renderQuestion(currentIndex);
+  }
+
+  // Optional: Swipe gestures for mobile
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+  document.addEventListener('touchend', e => {
+    let diff = e.changedTouches[0].screenX - touchStartX;
+    if (diff > 50) document.getElementById('prev').click();
+    else if (diff < -50) document.getElementById('next').click();
+  });
+</script>
+</body>
+</html>
