@@ -2,65 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Improvement Book</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Test</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f5fb;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      background: #fff;
+      font-weight: bold;
+      font-size: 1.2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      background: #fff;
+      border-bottom: 2px solid #ccc;
+    }
+    .tab {
+      padding: 1rem;
+      flex: none;
+      cursor: pointer;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+    }
+    .tab.active {
+      border-bottom: 3px solid #000;
+      color: #000;
+    }
+    .module {
+      margin: 1rem;
+      background: #fff;
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .module h2 {
+      margin-top: 0;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      border: 2px solid #007bff;
+      background: white;
+      color: #007bff;
+      cursor: pointer;
+    }
+    .btn.primary {
+      background: #007bff;
+      color: white;
+    }
+  </style>
 </head>
-<body class="bg-[#F3F7FF] font-sans text-gray-800">
+<body>
+  <header>← Improvement Book</header>
 
-  <!-- Header -->
-  <div class="p-4 flex items-center">
-    <button class="text-xl mr-3">&larr;</button>
-    <div>
-      <h1 class="text-lg font-semibold">Improvement Book</h1>
-      <p class="text-sm text-gray-500">Re-attempt your mistakes and improve</p>
+  <div class="tabs">
+    <div class="tab active">Botany</div>
+    <div class="tab">Chemistry</div>
+    <div class="tab">English</div>
+    <div class="tab">Physics</div>
+  </div>
+
+  <div class="module">
+    <h2>Last Practiced Module</h2>
+    <strong>Plant Kingdom</strong>
+    <p>0/60 Mistakes</p>
+    <div class="buttons">
+      <button class="btn">Revise</button>
+      <button class="btn primary">Re-attempt</button>
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="flex px-4 overflow-x-auto">
-    <button class="tab-btn font-semibold px-4 py-2 border-b-2 border-black text-black">Botany</button>
-    <button class="tab-btn px-4 py-2 text-gray-500">Chemistry</button>
-    <button class="tab-btn px-4 py-2 text-gray-500">English</button>
-    <button class="tab-btn px-4 py-2 text-gray-500">Physics</button>
+  <div class="module">
+    <h2>Previous Modules</h2>
+    <strong>Biomolecules</strong>
   </div>
-
-  <!-- Last Practiced Module -->
-  <div class="p-4">
-    <p class="text-gray-600 font-semibold mb-2">Last Practiced Module</p>
-    <div class="bg-white rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center">
-        <img src="https://img.icons8.com/color/48/magnet.png" class="w-8 h-8 mr-2"/>
-        <h2 class="text-md font-semibold">Plant Kingdom</h2>
-      </div>
-      <p class="mt-2 text-sm text-gray-500">0/60 Mistakes</p>
-      <div class="w-full bg-gray-200 rounded-full h-1 my-2">
-        <div class="bg-blue-600 h-1 w-[0%] rounded-full"></div>
-      </div>
-      <div class="flex gap-2 mt-3">
-        <button class="border border-blue-600 text-blue-600 px-4 py-1 rounded-full text-sm">Revise</button>
-        <button class="bg-blue-600 text-white px-4 py-1 rounded-full text-sm">Re-attempt</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Previous Modules -->
-  <div class="px-4 mt-2">
-    <p class="text-gray-600 font-semibold mb-2">Previous Modules</p>
-    <div class="bg-white rounded-2xl p-4 shadow-sm flex items-center">
-      <img src="https://img.icons8.com/color/48/magnet.png" class="w-8 h-8 mr-2"/>
-      <h2 class="text-md font-semibold">Biomolecules</h2>
-    </div>
-  </div>
-
-  <script>
-    const tabs = document.querySelectorAll(".tab-btn");
-    tabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        tabs.forEach(t => t.classList.remove("border-black", "text-black", "font-semibold"));
-        tab.classList.add("border-black", "text-black", "font-semibold");
-      });
-    });
-  </script>
 </body>
 </html>
