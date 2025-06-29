@@ -1,85 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Review Wrong Answers</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Result</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f2f4fb;
-      padding: 20px;
       margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f5fb;
+      text-align: center;
     }
-    h2 {
-      color: #444;
-      margin-top: 30px;
-    }
-    .card {
-      background-color: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .question {
+    header {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      background: #fff;
       font-weight: bold;
-      margin-bottom: 10px;
+      font-size: 1.2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-    .answer {
-      margin: 4px 0;
-      padding: 10px;
+    .medal {
+      margin-top: 2rem;
+    }
+    .summary {
+      display: flex;
+      justify-content: space-around;
+      margin: 2rem 1rem;
+    }
+    .summary div {
+      background: #fff;
       border-radius: 10px;
+      padding: 1rem;
+      width: 30%;
     }
-    .wrong {
-      background-color: #ffe2e2;
-      color: #c00;
+    .btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      margin: 1rem;
     }
-    .correct {
-      background-color: #e0ffe0;
-      color: #0a0;
+    .practice {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
     }
-    .test-header {
-      font-size: 20px;
-      color: #333;
-      margin: 30px 0 10px;
-      border-left: 5px solid #a259ff;
-      padding-left: 10px;
+    .practice div {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      width: 120px;
     }
   </style>
 </head>
 <body>
+  <header>← Result</header>
 
-<h1>📝 Your Wrong Answers</h1>
-<div id="review"></div>
+  <div class="medal">
+    <img src="https://img.icons8.com/fluency/96/medal2.png" alt="medal"/>
+    <h2>You could do better!</h2>
+  </div>
 
-<script>
-  const reviewContainer = document.getElementById('review');
-  const wrongAnswers = JSON.parse(localStorage.getItem('wrongAnswers') || '{}');
+  <div class="summary">
+    <div><strong>0/10</strong><br>Correct</div>
+    <div><strong>0/10</strong><br>Marks</div>
+    <div><strong>1s</strong><br>Avg. time</div>
+  </div>
 
-  if (Object.keys(wrongAnswers).length === 0) {
-    reviewContainer.innerHTML = "<p>No wrong answers found. Well done! 🎉</p>";
-  } else {
-    for (const [testCode, wrongList] of Object.entries(wrongAnswers)) {
-      if (wrongList.length === 0) continue;
+  <button class="btn">Review solutions</button>
 
-      const testHeader = document.createElement("div");
-      testHeader.className = "test-header";
-      testHeader.textContent = `📘 ${testCode} - ${wrongList[0]?.subject || ''}`;
-      reviewContainer.appendChild(testHeader);
-
-      wrongList.forEach((item, index) => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <div class="question">Q${index + 1}: ${item.question}</div>
-          <div class="answer wrong">❌ Your Answer: ${item.yourAnswer || "Not Answered"}</div>
-          <div class="answer correct">✅ Correct Answer: ${item.correctAnswer}</div>
-        `;
-        reviewContainer.appendChild(card);
-      });
-    }
-  }
-</script>
-
+  <div class="practice">
+    <div>
+      <img src="https://img.icons8.com/color/96/physics.png" width="50" />
+      <div>Physics</div>
+    </div>
+    <div>
+      <img src="https://img.icons8.com/color/96/leaf.png" width="50" />
+      <div>Botany</div>
+    </div>
+  </div>
 </body>
 </html>
