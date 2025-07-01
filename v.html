@@ -3,79 +3,126 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QR Code Scanner</title>
+  <title>Custom YouTube Player</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      text-align: center;
-      padding: 2rem;
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: black;
+      overflow: hidden;
     }
-    #qr-result {
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      background: #fff;
-      display: inline-block;
-      max-width: 90%;
-      word-wrap: break-word;
+
+    #player {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
     }
-    canvas {
-      display: none;
+
+    .controls {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.5);
+      border-radius: 50px;
+      padding: 10px 20px;
+    }
+
+    .btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      fill: white;
+      width: 40px;
+      height: 40px;
+      transition: transform 0.2s;
+    }
+
+    .btn:hover {
+      transform: scale(1.1);
     }
   </style>
 </head>
 <body>
-  <h2>QR Code Scanner from Image URL</h2>
-  <p id="status">Loading image...</p>
-  <canvas id="qr-canvas"></canvas>
-  <div id="qr-result"></div>
 
-  <!-- jsQR library -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <div id="player"></div>
+
+  <div class="controls">
+    <button class="btn" id="playPauseBtn" title="Play/Pause">
+      <!-- Play icon SVG -->
+      <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <polygon points="5,3 19,12 5,21" />
+      </svg>
+      <!-- Pause icon SVG (hidden initially) -->
+      <svg id="pauseIcon" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <rect x="6" y="4" width="4" height="16"/>
+        <rect x="14" y="4" width="4" height="16"/>
+      </svg>
+    </button>
+  </div>
+
   <script>
-    function getQueryParam(name) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
+    let player;
+    const urlPath = window.location.pathname.slice(1); // Gets <yt_url> from example.com/<yt_url>
+
+    const videoId = extractVideoId(urlPath); // handles full URL or ID
+
+    function extractVideoId(url) {
+      const ytMatch = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+      return ytMatch ? ytMatch[1] : url;
     }
 
-    async function loadImageAndScanQR(url) {
-      const img = new Image();
-      img.crossOrigin = "Anonymous"; // Allow CORS if image is hosted elsewhere
-      img.src = url;
+    // Load the YouTube IFrame Player API
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
 
-      img.onload = () => {
-        const canvas = document.getElementById('qr-canvas');
-        const context = canvas.getContext('2d');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+    window.onYouTubeIframeAPIReady = function () {
+      player = new YT.Player('player', {
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0
+        },
+        events: {
+          onReady: onPlayerReady
+        }
+      });
+    };
 
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, canvas.width, canvas.height);
+    function onPlayerReady(event) {
+      const playIcon = document.getElementById("playIcon");
+      const pauseIcon = document.getElementById("pauseIcon");
+      const playPauseBtn = document.getElementById("playPauseBtn");
 
-        const status = document.getElementById('status');
-        const result = document.getElementById('qr-result');
-
-        if (code) {
-          status.textContent = "QR Code found!";
-          result.textContent = code.data;
+      playPauseBtn.onclick = function () {
+        const state = player.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          player.pauseVideo();
+          playIcon.style.display = "block";
+          pauseIcon.style.display = "none";
         } else {
-          status.textContent = "No QR Code found in the image.";
+          player.playVideo();
+          playIcon.style.display = "none";
+          pauseIcon.style.display = "block";
         }
       };
 
-      img.onerror = () => {
-        document.getElementById('status').textContent = "Failed to load image.";
-      };
-    }
-
-    const imgUrl = getQueryParam('img');
-    if (imgUrl) {
-      loadImageAndScanQR(imgUrl);
-    } else {
-      document.getElementById('status').textContent = "No 'img' parameter found in the URL.";
+      // Set initial state
+      playIcon.style.display = "none";
+      pauseIcon.style.display = "block";
     }
   </script>
+
 </body>
 </html>
