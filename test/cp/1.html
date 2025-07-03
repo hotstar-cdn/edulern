@@ -1,66 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>QuizPage</title>
+  <meta charset="UTF-8" />
+  <title>Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="data.js"></script>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body { font-family: sans-serif; margin:0; padding:20px; background:#fdfdfd; max-width:370px; margin:auto; }
-    h1 { font-size:18px; text-align:center; margin-bottom:16px; }
-    .question { margin-bottom:24px; }
-    .question-img { width:100%; border-radius:8px; margin-bottom:8px; }
-    .options { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .option { border:2px solid #ccc; padding:6px; border-radius:8px; text-align:center; cursor:pointer; }
-    .option.selected { border-color:#007bff; }
-    .option img { width:100%; height:100px; object-fit:cover; border-radius:4px; }
-    button { width:100%; padding:12px; margin-top:16px; font-size:16px; background:#28a745; color:#fff; border:none; border-radius:8px; cursor:pointer; }
+    body { font-family: sans-serif; max-width: 370px; margin: auto; background: #f4f4f4; padding: 0; }
+    .slide { display: none; padding: 20px; animation: fadeIn 0.3s ease-in; }
+    .slide.active { display: block; }
+    .question-img, .option-img { max-width: 100%; margin: 10px auto; border-radius: 8px; }
+    .option { border: 2px solid #ccc; padding: 10px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; background: #fff; }
+    .option.selected { background: #cce5ff; border-color: #3399ff; }
+    button { width: 100%; padding: 12px; font-size: 16px; border: none; background: #007bff; color: white; border-radius: 8px; margin-top: 20px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
   </style>
 </head>
 <body>
-  <h1 id="quizTitle">Loading...</h1>
-  <form id="quizForm">
-    <div id="quizContainer"></div>
-    <button type="submit">Submit</button>
-  </form>
-
+  <div id="quizContainer"></div>
   <script>
-    function getQueryParam(n){return new URLSearchParams(location.search).get(n);}
-    const code = getQueryParam("code"), test = allTests[code];
-    const titleEl = document.getElementById("quizTitle"), c = document.getElementById("quizContainer");
-    if(!test){ titleEl.textContent = "Invalid test code."; } else {
-      titleEl.textContent = test.title;
-      test.questions.forEach((q,i)=>{
-        const div = document.createElement("div"); div.className="question";
-        let html = `${q.questionImage?`<img src="${q.questionImage}" class="question-img">`:``}<p>${i+1}. ${q.question}</p><div class="options">`;
-        q.options.forEach((o,j)=>{
-          html += `<label class="option" data-q="${i}" data-o="${j}">
-            ${o.image?`<img src="${o.image}">`:``}
-            ${o.text?`<p>${o.text}</p>`:``}
-            <input type="radio" name="q${i}" value="${j}" style="display:none">
-          </label>`;
-        });
-        html += "</div>";
-        div.innerHTML = html;
-        c.appendChild(div);
+    const code = new URLSearchParams(location.search).get("code"), test = allTests[code];
+    const container = document.getElementById("quizContainer");
+    let currentIndex = 0, userAnswers = [];
+
+    if (!test) {
+      container.innerHTML = "<h2>Invalid Code</h2>";
+    } else {
+      test.questions.forEach((q, i) => {
+        const div = document.createElement("div");
+        div.className = "slide" + (i === 0 ? " active" : "");
+        div.innerHTML = `<h3>Q${i + 1}: ${q.question}</h3>${q.questionImage ? `<img src="${q.questionImage}" class="question-img">` : ""}
+          ${q.options.map((opt, j) => `
+            <div class="option" onclick="selectOption(${i}, ${j}, this)">
+              ${opt.image ? `<img src="${opt.image}" class="option-img">` : ""}
+              ${opt.text ? `<p>${opt.text}</p>` : ""}
+            </div>`).join('')}
+        `;
+        container.appendChild(div);
       });
-      c.addEventListener("click", e=>{
-        const opt = e.target.closest(".option");
-        if(!opt) return;
-        const q=opt.dataset.q, o=opt.dataset.o;
-        document.querySelectorAll(`label[data-q="${q}"]`).forEach(el=>el.classList.remove("selected"));
-        opt.classList.add("selected");
-        document.querySelector(`input[name="q${q}"][value="${o}"]`).checked = true;
-      });
-      document.getElementById("quizForm").addEventListener("submit", e=>{
-        e.preventDefault();
-        const answers = test.questions.map((_,i)=>{
-          const sel = document.querySelector(`input[name="q${i}"]:checked`);
-          return sel ? +sel.value : -1;
-        });
-        localStorage.setItem("quiz_"+code+"_ans", JSON.stringify(answers));
-        location.href = "2.html?code="+code;
-      });
+
+      const submitBtn = document.createElement("button");
+      submitBtn.textContent = "Submit";
+      submitBtn.onclick = () => {
+        localStorage.setItem("quiz_" + code + "_ans", JSON.stringify(userAnswers));
+        location.href = `2.html?code=${code}`;
+      };
+      container.appendChild(submitBtn);
+    }
+
+    function selectOption(qIdx, optIdx, el) {
+      userAnswers[qIdx] = optIdx;
+      document.querySelectorAll(`.slide:nth-child(${qIdx + 1}) .option`).forEach(o => o.classList.remove("selected"));
+      el.classList.add("selected");
+      setTimeout(() => nextSlide(), 300);
+    }
+
+    function nextSlide() {
+      const slides = document.querySelectorAll(".slide");
+      if (currentIndex < slides.length - 1) {
+        slides[currentIndex].classList.remove("active");
+        currentIndex++;
+        slides[currentIndex].classList.add("active");
+      }
     }
   </script>
 </body>
