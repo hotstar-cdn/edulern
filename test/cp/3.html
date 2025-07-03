@@ -1,39 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Review</title>
-  <script src="data.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Review Answers</title>
   <style>
-    body { font-family: sans-serif; background: #f8fff8; max-width: 370px; margin: auto; padding: 20px; }
-    .qBox { margin-bottom: 20px; padding: 10px; background: #fff; border-radius: 10px; }
-    .option { border: 2px solid transparent; padding: 6px; border-radius: 6px; margin: 6px 0; }
-    .correct { border-color: green; background: #e0ffe0; }
-    .incorrect { border-color: red; background: #ffe0e0; }
-    .selected { border-color: blue; }
-    img.option-img { width: 100%; border-radius: 6px; }
+    body { font-family: sans-serif; background: #f7f9fc; padding: 10px; }
+    .card { background: white; padding: 15px; margin: 10px 0; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .tag { background: #ffd699; padding: 4px 8px; border-radius: 10px; font-size: 12px; display: inline-block; margin-bottom: 5px; }
+    .solution { display: none; margin-top: 10px; padding: 10px; background: #e7f5ff; border-radius: 8px; }
+    .viewBtn { color: #007bff; cursor: pointer; margin-top: 10px; display: inline-block; }
   </style>
 </head>
 <body>
-  <h2 style="text-align:center;">Review Answers</h2>
-  <div id="review"></div>
+  <h2>Review Answers</h2>
+  <div id="reviewContainer"></div>
+
+  <script src="data.js"></script>
   <script>
-    const code = new URLSearchParams(location.search).get("code"), t = allTests[code];
-    const ans = JSON.parse(localStorage.getItem("quiz_" + code + "_ans") || "[]");
-    const rev = document.getElementById("review");
-    t.questions.forEach((q, i) => {
-      const d = document.createElement("div");
-      d.className = "qBox";
-      d.innerHTML = `<p><strong>Q${i+1}: ${q.question}</strong></p>${q.questionImage ? `<img src='${q.questionImage}' class='option-img'>` : ''}`;
-      q.options.forEach((o, j) => {
-        let cls = "option";
-        if (j === q.answer) cls += " correct";
-        if (j === ans[i] && j !== q.answer) cls += " incorrect";
-        if (j === ans[i]) cls += " selected";
-        d.innerHTML += `<div class='${cls}'>${o.image ? `<img src='${o.image}' class='option-img'>` : o.text}</div>`;
-      });
-      rev.appendChild(d);
+    const code = new URLSearchParams(location.search).get('code');
+    const data = quizzes[code]?.questions || [];
+    const answers = JSON.parse(localStorage.getItem("answers"));
+    const container = document.getElementById("reviewContainer");
+
+    data.forEach((q, i) => {
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <div class="tag">${q.difficulty.toUpperCase()}</div>
+        <h3>Question ${i + 1}</h3>
+        ${q.type === "image" ? `<img src="${q.questionImage}" />` : `<p>${q.question}</p>`}
+        <div class="viewBtn" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">View solution</div>
+        <div class="solution">
+          ${q.solutionImage ? `<img src="${q.solutionImage}" />` : `<p>${q.solution}</p>`}
+        </div>
+      `;
+      container.appendChild(div);
     });
   </script>
 </body>
