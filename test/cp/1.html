@@ -1,142 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Quiz</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Quiz App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="data.js"></script>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
+      font-family: 'Arial', sans-serif;
       margin: 0;
       background: #f2f6ff;
     }
-    .carousel {
-      display: flex;
-      overflow-x: scroll;
-      scroll-snap-type: x mandatory;
-      width: 100vw;
-      height: 100vh;
-    }
-    .slide {
-      scroll-snap-align: start;
-      flex: 0 0 100%;
+    .container {
       padding: 20px;
-      box-sizing: border-box;
     }
-    .question-box {
+    .question-card {
+      display: none;
+      flex-direction: column;
+      align-items: center;
       background: white;
       border-radius: 12px;
       padding: 20px;
-      margin: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    .question-box img {
+    .question-card.active {
+      display: flex;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .question-text {
+      font-size: 18px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .question-image {
       max-width: 100%;
-      margin: 10px 0;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
     }
     .option {
-      background: #fff;
-      border: 1px solid #ddd;
-      margin: 10px 0;
-      padding: 10px;
+      padding: 10px 15px;
+      background: #e7ecff;
       border-radius: 8px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transition: 0.3s ease;
+      text-align: center;
+      flex: 1 1 40%;
     }
-    .option:hover {
-      background: #e9f0ff;
+    .option img {
+      width: 100px;
+      height: auto;
+      border-radius: 6px;
     }
     .option.selected {
-      border-color: #007bff;
-      background: #d9eaff;
+      background: #4f83ff;
+      color: white;
+    }
+    .nav-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
     }
     .submit-btn {
-      margin: 20px;
-      padding: 15px;
-      font-size: 18px;
+      margin: 30px auto;
+      padding: 12px 30px;
       background: #007bff;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
+      font-size: 18px;
       display: none;
       cursor: pointer;
-      width: calc(100% - 40px);
     }
   </style>
 </head>
 <body>
+  <div class="container" id="quiz-container"></div>
+  <button class="submit-btn" onclick="submitQuiz()">Submit</button>
 
-<div class="carousel" id="carousel"></div>
-<button class="submit-btn" onclick="submitQuiz()">Submit</button>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code') || 'demo';
+    const totalQuestions = parseInt(urlParams.get('n') || 10);
 
-<script src="data.js"></script>
-<script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code') || 'phy101';
-  const count = parseInt(urlParams.get('count')) || 5;
-  const quiz = quizzes[code];
-  const container = document.getElementById('carousel');
+    const quiz = tests[code];
+    const answers = Array(quiz.questions.length).fill(null);
+    const container = document.getElementById('quiz-container');
 
-  let answers = new Array(count).fill(null);
-  let startTime = Date.now();
+    let current = 0;
 
-  quiz.questions.slice(0, count).forEach((q, i) => {
-    const slide = document.createElement('div');
-    slide.className = 'slide';
-    slide.innerHTML = `
-      <div class="question-box">
-        <h2>Q${i + 1}: ${q.question}</h2>
-        ${q.questionImage ? `<img src="${q.questionImage}" alt="Question Image">` : ""}
-        <div>
-          ${q.options.map((opt, j) => `
-            <div class="option" onclick="select(${i}, ${j}, this)">
-              ${opt.image ? `<img src="${opt.image}" width="60">` : ""}
-              ${opt.text ? `<span>${opt.text}</span>` : ""}
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-    container.appendChild(slide);
-  });
+    quiz.questions.forEach((q, index) => {
+      const card = document.createElement('div');
+      card.className = 'question-card';
+      if (index === 0) card.classList.add('active');
 
-  function select(qIndex, optIndex, element) {
-    answers[qIndex] = optIndex;
-    const all = container.children[qIndex].querySelectorAll('.option');
-    all.forEach(opt => opt.classList.remove('selected'));
-    element.classList.add('selected');
+      const qtext = document.createElement('div');
+      qtext.className = 'question-text';
+      qtext.textContent = `Q${index + 1}: ${q.question}`;
+      card.appendChild(qtext);
 
-    // Auto-swipe to next
-    if (qIndex + 1 < count) {
-      container.children[qIndex + 1].scrollIntoView({ behavior: 'smooth' });
-    }
+      if (q.isImageQuestion && q.image) {
+        const img = document.createElement('img');
+        img.src = q.image;
+        img.className = 'question-image';
+        card.appendChild(img);
+      }
 
-    // Show submit button if last
-    if (answers.every(a => a !== null)) {
-      document.querySelector('.submit-btn').style.display = 'block';
-    }
-  }
+      const optionsDiv = document.createElement('div');
+      optionsDiv.className = 'options';
 
-  function submitQuiz() {
-    let correct = 0;
-    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-    const data = quiz.questions.slice(0, count);
+      q.options.forEach((opt, i) => {
+        const optDiv = document.createElement('div');
+        optDiv.className = 'option';
+        optDiv.onclick = () => select(index, i);
+        if (q.isImageAnswer) {
+          const img = document.createElement('img');
+          img.src = opt;
+          optDiv.appendChild(img);
+        } else {
+          optDiv.textContent = opt;
+        }
+        optionsDiv.appendChild(optDiv);
+      });
 
-    answers.forEach((ans, i) => {
-      if (ans === data[i].correct) correct++;
+      card.appendChild(optionsDiv);
+
+      const nav = document.createElement('div');
+      nav.className = 'nav-buttons';
+      if (index > 0) {
+        const prev = document.createElement('button');
+        prev.textContent = 'Previous';
+        prev.onclick = () => show(index - 1);
+        nav.appendChild(prev);
+      }
+      if (index < quiz.questions.length - 1) {
+        const next = document.createElement('button');
+        next.textContent = 'Next';
+        next.onclick = () => show(index + 1);
+        nav.appendChild(next);
+      }
+
+      card.appendChild(nav);
+      container.appendChild(card);
     });
 
-    sessionStorage.setItem('score', correct);
-    sessionStorage.setItem('total', count);
-    sessionStorage.setItem('time', timeTaken);
-    sessionStorage.setItem('answers', JSON.stringify(answers));
-    sessionStorage.setItem('code', code);
+    function show(i) {
+      document.querySelectorAll('.question-card').forEach((card, index) => {
+        card.classList.toggle('active', index === i);
+      });
+      current = i;
+    }
 
-    window.location.href = `2.html`;
-  }
-</script>
+    function select(qIndex, optIndex) {
+      answers[qIndex] = optIndex;
+      document.querySelectorAll('.question-card')[qIndex]
+        .querySelectorAll('.option')
+        .forEach((opt, i) => {
+          opt.classList.toggle('selected', i === optIndex);
+        });
+
+      if (answers.every(a => a !== null)) {
+        document.querySelector('.submit-btn').style.display = 'block';
+      }
+    }
+
+    function submitQuiz() {
+      const result = {
+        answers,
+        correct: quiz.questions.map(q => q.correct),
+        total: quiz.questions.length,
+        code,
+      };
+      localStorage.setItem('quizResult', JSON.stringify(result));
+      window.location.href = '2.html';
+    }
+  </script>
 </body>
 </html>
