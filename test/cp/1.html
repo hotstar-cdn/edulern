@@ -1,92 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Test</title>
+  <meta charset="UTF-8">
+  <title>Quiz</title>
+  <script src="data.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f1f5fb;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-      background: #fff;
-      font-weight: bold;
-      font-size: 1.2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .tabs {
-      display: flex;
-      overflow-x: auto;
-      background: #fff;
-      border-bottom: 2px solid #ccc;
-    }
-    .tab {
-      padding: 1rem;
-      flex: none;
-      cursor: pointer;
-      font-weight: 500;
-      border-bottom: 3px solid transparent;
-    }
-    .tab.active {
-      border-bottom: 3px solid #000;
-      color: #000;
-    }
-    .module {
-      margin: 1rem;
-      background: #fff;
-      border-radius: 10px;
-      padding: 1rem;
-    }
-    .module h2 {
-      margin-top: 0;
-    }
-    .buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .btn {
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
-      border: 2px solid #007bff;
-      background: white;
-      color: #007bff;
-      cursor: pointer;
-    }
-    .btn.primary {
-      background: #007bff;
-      color: white;
-    }
+    body { font-family: Arial; padding: 20px; text-align: center; max-width: 370px; margin: auto; background: #f9f9f9; }
+    h2 { font-size: 20px; }
+    img.question-img, img.option-img { max-width: 300px; display: block; margin: 10px auto; }
+    .options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .option { border: 1px solid #ccc; padding: 5px; border-radius: 5px; cursor: pointer; }
+    .option input { display: none; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
   </style>
 </head>
 <body>
-  <header>← Improvement Book</header>
+  <h2 id="quizTitle">Loading...</h2>
+  <form id="quizForm">
+    <div id="quizContainer"></div>
+    <button type="submit">Submit</button>
+  </form>
 
-  <div class="tabs">
-    <div class="tab active">Botany</div>
-    <div class="tab">Chemistry</div>
-    <div class="tab">English</div>
-    <div class="tab">Physics</div>
-  </div>
+  <script>
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
 
-  <div class="module">
-    <h2>Last Practiced Module</h2>
-    <strong>Plant Kingdom</strong>
-    <p>0/60 Mistakes</p>
-    <div class="buttons">
-      <button class="btn">Revise</button>
-      <button class="btn primary">Re-attempt</button>
-    </div>
-  </div>
+    const code = getQueryParam('code');
+    const test = allTests[code];
 
-  <div class="module">
-    <h2>Previous Modules</h2>
-    <strong>Biomolecules</strong>
-  </div>
+    const titleEl = document.getElementById("quizTitle");
+    const container = document.getElementById("quizContainer");
+
+    if (!test) {
+      titleEl.textContent = "Invalid or missing test code.";
+    } else {
+      titleEl.textContent = test.title;
+
+      test.questions.forEach((q, i) => {
+        const qDiv = document.createElement("div");
+        qDiv.innerHTML = `
+          ${q.questionImage ? `<img src="${q.questionImage}" class="question-img">` : ""}
+          <p>${i + 1}. ${q.question}</p>
+          <div class="options">
+            ${q.options.map((opt, j) => `
+              <label class="option">
+                <input type="radio" name="q${i}" value="${j}">
+                ${opt.image ? `<img src="${opt.image}" class="option-img">` : ""}
+                ${opt.text ? `<p>${opt.text}</p>` : ""}
+              </label>
+            `).join('')}
+          </div>
+          <hr>
+        `;
+        container.appendChild(qDiv);
+      });
+
+      document.getElementById("quizForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const answers = [];
+        for (let i = 0; i < test.questions.length; i++) {
+          const selected = document.querySelector(`input[name="q${i}"]:checked`);
+          answers.push(selected ? parseInt(selected.value) : -1);
+        }
+        localStorage.setItem("quizCode", code);
+        localStorage.setItem("userAnswers", JSON.stringify(answers));
+        window.location.href = `2.html?code=${code}`;
+      });
+    }
+  </script>
 </body>
 </html>
