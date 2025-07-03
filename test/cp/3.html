@@ -1,63 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Answer Review</title>
+  <title>Review</title>
   <script src="data.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body { font-family: Arial; padding: 20px; background: #fff8e1; max-width: 370px; margin: auto; }
-    h2 { font-size: 22px; margin-bottom: 10px; text-align: center; }
-    img.question-img, img.option-img { max-width: 300px; display: block; margin: 10px auto; }
-    .question-box { margin-bottom: 30px; }
-    .options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-    .option { border: 2px solid transparent; border-radius: 6px; padding: 5px; max-width: 160px; text-align: center; }
-    .correct { border-color: green; }
-    .incorrect { border-color: red; }
-    .selected { box-shadow: 0 0 0 2px blue inset; }
+    body { font-family:sans-serif; padding:20px; background:#fdfaf0; max-width:370px; margin:auto; }
+    h1 { text-align:center; margin-bottom:16px; font-size:20px;}
+    .qBox { margin-bottom:24px; background:#fff; padding:12px; border-radius:8px; }
+    .question-img, .option-img { width:100%; border-radius:6px; margin-bottom:8px;}
+    .options { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .option { border:2px solid transparent; border-radius:6px; padding:6px; text-align:center; }
+    .option.correct { border-color:green; }
+    .option.incorrect { border-color:red; }
+    .option.selected { box-shadow: inset 0 0 0 3px blue; }
   </style>
 </head>
 <body>
-  <h2>Review Answers</h2>
+  <h1>Review Answers</h1>
   <div id="reviewContainer"></div>
 
   <script>
-    function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
-    }
-
-    const code = getQueryParam('code');
-    const test = allTests[code];
-    const userAnswers = JSON.parse(localStorage.getItem("userAnswers") || "[]");
-    const container = document.getElementById("reviewContainer");
-
-    if (!test) {
-      container.innerHTML = "<p>Invalid test code.</p>";
-    } else {
-      test.questions.forEach((q, i) => {
-        const box = document.createElement("div");
-        box.className = "question-box";
-        box.innerHTML = `
-          <h4>Q${i + 1}: ${q.question}</h4>
-          ${q.questionImage ? `<img src="${q.questionImage}" class="question-img">` : ""}
-        `;
-
-        const optionsHTML = q.options.map((opt, j) => {
-          let cls = "option";
-          if (j === q.answer) cls += " correct";
-          if (j === userAnswers[i] && j !== q.answer) cls += " incorrect";
-          if (j === userAnswers[i]) cls += " selected";
-
-          return `
-            <div class="${cls}">
-              ${opt.image ? `<img src="${opt.image}" class="option-img">` : ""}
-              ${opt.text ? `<p>${opt.text}</p>` : ""}
-            </div>
-          `;
-        }).join('');
-
-        box.innerHTML += `<div class="options">${optionsHTML}</div>`;
-        container.appendChild(box);
+    function get(n){return new URLSearchParams(location.search).get(n);}
+    const code = get("code"), t = allTests[code];
+    const ans = JSON.parse(localStorage.getItem("quiz_"+code+"_ans")||"[]");
+    const rc = document.getElementById("reviewContainer");
+    if(!t){ rc.textContent="Invalid code."; }
+    else {
+      t.questions.forEach((q,i)=>{
+        const div = document.createElement("div"); div.className="qBox";
+        let h = `<p><strong>Q${i+1}. ${q.question}</strong></p>`;
+        if(q.questionImage) h += `<img src="${q.questionImage}" class="question-img">`;
+        h += `<div class="options">`;
+        q.options.forEach((o,j)=>{
+          let cls="option";
+          if(j===q.answer) cls+=" correct";
+          if(j===ans[i] && j!==q.answer) cls+=" incorrect";
+          if(j===ans[i]) cls+=" selected";
+          h+=`<div class="${cls}">
+                ${o.image?`<img src="${o.image}" class="option-img">`:``}
+                ${o.text?`<p>${o.text}</p>`:``}
+              </div>`;
+        });
+        h+="</div>";
+        div.innerHTML = h;
+        rc.appendChild(div);
       });
     }
   </script>
