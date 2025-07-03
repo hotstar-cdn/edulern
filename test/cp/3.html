@@ -1,89 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Result</title>
+  <meta charset="UTF-8">
+  <title>Answer Review</title>
+  <script src="data.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f1f5fb;
-      text-align: center;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-      background: #fff;
-      font-weight: bold;
-      font-size: 1.2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .medal {
-      margin-top: 2rem;
-    }
-    .summary {
-      display: flex;
-      justify-content: space-around;
-      margin: 2rem 1rem;
-    }
-    .summary div {
-      background: #fff;
-      border-radius: 10px;
-      padding: 1rem;
-      width: 30%;
-    }
-    .btn {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      border-radius: 30px;
-      cursor: pointer;
-      margin: 1rem;
-    }
-    .practice {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    .practice div {
-      background: #fff;
-      padding: 1rem;
-      border-radius: 10px;
-      text-align: center;
-      width: 120px;
-    }
+    body { font-family: Arial; padding: 20px; background: #fff8e1; max-width: 370px; margin: auto; }
+    h2 { font-size: 22px; margin-bottom: 10px; text-align: center; }
+    img.question-img, img.option-img { max-width: 300px; display: block; margin: 10px auto; }
+    .question-box { margin-bottom: 30px; }
+    .options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .option { border: 2px solid transparent; border-radius: 6px; padding: 5px; max-width: 160px; text-align: center; }
+    .correct { border-color: green; }
+    .incorrect { border-color: red; }
+    .selected { box-shadow: 0 0 0 2px blue inset; }
   </style>
 </head>
 <body>
-  <header>← Result</header>
+  <h2>Review Answers</h2>
+  <div id="reviewContainer"></div>
 
-  <div class="medal">
-    <img src="https://img.icons8.com/fluency/96/medal2.png" alt="medal"/>
-    <h2>You could do better!</h2>
-  </div>
+  <script>
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
 
-  <div class="summary">
-    <div><strong>0/10</strong><br>Correct</div>
-    <div><strong>0/10</strong><br>Marks</div>
-    <div><strong>1s</strong><br>Avg. time</div>
-  </div>
+    const code = getQueryParam('code');
+    const test = allTests[code];
+    const userAnswers = JSON.parse(localStorage.getItem("userAnswers") || "[]");
+    const container = document.getElementById("reviewContainer");
 
-  <button class="btn">Review solutions</button>
+    if (!test) {
+      container.innerHTML = "<p>Invalid test code.</p>";
+    } else {
+      test.questions.forEach((q, i) => {
+        const box = document.createElement("div");
+        box.className = "question-box";
+        box.innerHTML = `
+          <h4>Q${i + 1}: ${q.question}</h4>
+          ${q.questionImage ? `<img src="${q.questionImage}" class="question-img">` : ""}
+        `;
 
-  <div class="practice">
-    <div>
-      <img src="https://img.icons8.com/color/96/physics.png" width="50" />
-      <div>Physics</div>
-    </div>
-    <div>
-      <img src="https://img.icons8.com/color/96/leaf.png" width="50" />
-      <div>Botany</div>
-    </div>
-  </div>
+        const optionsHTML = q.options.map((opt, j) => {
+          let cls = "option";
+          if (j === q.answer) cls += " correct";
+          if (j === userAnswers[i] && j !== q.answer) cls += " incorrect";
+          if (j === userAnswers[i]) cls += " selected";
+
+          return `
+            <div class="${cls}">
+              ${opt.image ? `<img src="${opt.image}" class="option-img">` : ""}
+              ${opt.text ? `<p>${opt.text}</p>` : ""}
+            </div>
+          `;
+        }).join('');
+
+        box.innerHTML += `<div class="options">${optionsHTML}</div>`;
+        container.appendChild(box);
+      });
+    }
+  </script>
 </body>
 </html>
