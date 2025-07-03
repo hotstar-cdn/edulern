@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="main-container">
         <div class="header">
             <h1>Review Answers</h1>
@@ -23,15 +22,21 @@
     
     <script src="data.js"></script>
     <script>
+        // --- SVG Icons ---
+        const icons = {
+            correct: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill icon icon-correct" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>`,
+            incorrect: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill icon icon-incorrect" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/></svg>`,
+            accordion: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down accordion-icon" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>`,
+            solution: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightbulb-fill" viewBox="0 0 16 16"><path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A6 6 0 0 1 2 6zm6 8.5a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 0 1H8.5a.5.5 0 0 1-.5-.5z"/></svg>`
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const reviewContainer = document.getElementById('review-container');
             const errorContainer = document.getElementById('error-container');
             const resultData = JSON.parse(localStorage.getItem('quizResult'));
 
             if (!resultData) {
-                reviewContainer.style.display = 'none';
-                errorContainer.style.display = 'block';
-                return;
+                reviewContainer.style.display = 'none'; errorContainer.style.display = 'block'; return;
             }
 
             const { questions, userAnswers } = resultData;
@@ -40,16 +45,13 @@
             questions.forEach((q, index) => {
                 const userAnswer = userAnswers[q.id];
                 const isCorrect = userAnswer === q.correct_answer;
+                const resultIcon = isCorrect ? icons.correct : icons.incorrect;
 
                 let optionsDetailsHtml = '';
                 q.options.forEach(opt => {
                     let optionClass = 'option';
-                    if (opt.id === q.correct_answer) {
-                        optionClass += ' correct-answer';
-                    } else if (opt.id === userAnswer) {
-                        optionClass += ' user-answer-wrong';
-                    }
-
+                    if (opt.id === q.correct_answer) optionClass += ' correct-answer';
+                    else if (opt.id === userAnswer) optionClass += ' user-answer-wrong';
                     optionsDetailsHtml += `
                         <div class="${optionClass}">
                            <div class="option-content">
@@ -59,27 +61,28 @@
                                     ${opt.image ? `<div class="option-image"><img src="${opt.image}" alt="Option ${opt.id}"></div>` : ''}
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
 
                 reviewHtml += `
                     <div class="question-item">
                         <details>
-                            <summary>Question ${index + 1} ${isCorrect ? '✔️' : '❌'}</summary>
+                            <summary>
+                                <span>${resultIcon} Question ${index + 1}</span>
+                                ${icons.accordion}
+                            </summary>
                             <div class="review-details">
                                 <p class="question-text">${q.question_text}</p>
                                 ${q.question_image ? `<div class="question-image"><img src="${q.question_image}" alt="Question Image"></div>` : ''}
                                 <div class="options-container">${optionsDetailsHtml}</div>
                                 <div class="solution-box">
-                                    <h4>Solution</h4>
+                                    <h4>${icons.solution}Solution</h4>
                                     <p>${q.solution_text}</p>
                                     ${q.solution_image ? `<div class="solution-image"><img src="${q.solution_image}" alt="Solution Image"></div>` : ''}
                                 </div>
                             </div>
                         </details>
-                    </div>
-                `;
+                    </div>`;
             });
 
             reviewHtml += '</div>';
