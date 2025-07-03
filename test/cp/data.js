@@ -1,39 +1,57 @@
 // data.js
-
-const testData = {
-  "test123": {
-    subject: "CHEMISTRY",
+const allTests = {
+  ttm1: {
+    title: "Math Test",
     questions: [
       {
-        question: "The oxide of a metal has 32% oxygen. Its equivalent weight would be:",
-        options: ["34", "32", "17", "16"],
-        answer: "34"
+        question: "What is 5 + 3?",
+        questionImage: null,
+        options: [
+          { text: "6", image: null },
+          { text: "8", image: null },
+          { text: "10", image: null },
+          { text: "7", image: null }
+        ],
+        answer: 1
       },
       {
-        question: "Which of the following is a noble gas?",
-        options: ["Oxygen", "Nitrogen", "Helium", "Hydrogen"],
-        answer: "Helium"
-      },
-      {
-        question: "What is the atomic number of Sodium?",
-        options: ["10", "11", "12", "13"],
-        answer: "11"
+        question: "Identify the shape:",
+        questionImage: "triangle1.jpg",
+        options: [
+          { text: "", image: "circle1.jpg" },
+          { text: "", image: "triangle2.jpg" },
+          { text: "", image: "square1.jpg" },
+          { text: "", image: "hexagon1.jpg" }
+        ],
+        answer: 1
       }
     ]
   },
 
-  "bio001": {
-    subject: "BIOLOGY",
+  sci9: {
+    title: "Science Grade 9",
     questions: [
       {
-        question: "What is the powerhouse of the cell?",
-        options: ["Nucleus", "Ribosome", "Mitochondria", "Chloroplast"],
-        answer: "Mitochondria"
+        question: "What planet is known as the Red Planet?",
+        questionImage: null,
+        options: [
+          { text: "Earth", image: null },
+          { text: "Mars", image: null },
+          { text: "Jupiter", image: null },
+          { text: "Venus", image: null }
+        ],
+        answer: 1
       },
       {
-        question: "Which vitamin is produced in the skin with sunlight?",
-        options: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"],
-        answer: "Vitamin D"
+        question: "Which of these is a gas at room temperature?",
+        questionImage: null,
+        options: [
+          { text: "Water", image: null },
+          { text: "Oxygen", image: null },
+          { text: "Iron", image: null },
+          { text: "Mercury", image: null }
+        ],
+        answer: 1
       }
     ]
   }
