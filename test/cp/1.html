@@ -1,72 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Quiz</title>
+  <title>QuizPage</title>
   <script src="data.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body { font-family: Arial; padding: 20px; text-align: center; max-width: 370px; margin: auto; background: #f9f9f9; }
-    h2 { font-size: 20px; }
-    img.question-img, img.option-img { max-width: 300px; display: block; margin: 10px auto; }
-    .options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-    .option { border: 1px solid #ccc; padding: 5px; border-radius: 5px; cursor: pointer; }
-    .option input { display: none; }
-    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+    body { font-family: sans-serif; margin:0; padding:20px; background:#fdfdfd; max-width:370px; margin:auto; }
+    h1 { font-size:18px; text-align:center; margin-bottom:16px; }
+    .question { margin-bottom:24px; }
+    .question-img { width:100%; border-radius:8px; margin-bottom:8px; }
+    .options { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .option { border:2px solid #ccc; padding:6px; border-radius:8px; text-align:center; cursor:pointer; }
+    .option.selected { border-color:#007bff; }
+    .option img { width:100%; height:100px; object-fit:cover; border-radius:4px; }
+    button { width:100%; padding:12px; margin-top:16px; font-size:16px; background:#28a745; color:#fff; border:none; border-radius:8px; cursor:pointer; }
   </style>
 </head>
 <body>
-  <h2 id="quizTitle">Loading...</h2>
+  <h1 id="quizTitle">Loading...</h1>
   <form id="quizForm">
     <div id="quizContainer"></div>
     <button type="submit">Submit</button>
   </form>
 
   <script>
-    function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
-    }
-
-    const code = getQueryParam('code');
-    const test = allTests[code];
-
-    const titleEl = document.getElementById("quizTitle");
-    const container = document.getElementById("quizContainer");
-
-    if (!test) {
-      titleEl.textContent = "Invalid or missing test code.";
-    } else {
+    function getQueryParam(n){return new URLSearchParams(location.search).get(n);}
+    const code = getQueryParam("code"), test = allTests[code];
+    const titleEl = document.getElementById("quizTitle"), c = document.getElementById("quizContainer");
+    if(!test){ titleEl.textContent = "Invalid test code."; } else {
       titleEl.textContent = test.title;
-
-      test.questions.forEach((q, i) => {
-        const qDiv = document.createElement("div");
-        qDiv.innerHTML = `
-          ${q.questionImage ? `<img src="${q.questionImage}" class="question-img">` : ""}
-          <p>${i + 1}. ${q.question}</p>
-          <div class="options">
-            ${q.options.map((opt, j) => `
-              <label class="option">
-                <input type="radio" name="q${i}" value="${j}">
-                ${opt.image ? `<img src="${opt.image}" class="option-img">` : ""}
-                ${opt.text ? `<p>${opt.text}</p>` : ""}
-              </label>
-            `).join('')}
-          </div>
-          <hr>
-        `;
-        container.appendChild(qDiv);
+      test.questions.forEach((q,i)=>{
+        const div = document.createElement("div"); div.className="question";
+        let html = `${q.questionImage?`<img src="${q.questionImage}" class="question-img">`:``}<p>${i+1}. ${q.question}</p><div class="options">`;
+        q.options.forEach((o,j)=>{
+          html += `<label class="option" data-q="${i}" data-o="${j}">
+            ${o.image?`<img src="${o.image}">`:``}
+            ${o.text?`<p>${o.text}</p>`:``}
+            <input type="radio" name="q${i}" value="${j}" style="display:none">
+          </label>`;
+        });
+        html += "</div>";
+        div.innerHTML = html;
+        c.appendChild(div);
       });
-
-      document.getElementById("quizForm").addEventListener("submit", function(e) {
+      c.addEventListener("click", e=>{
+        const opt = e.target.closest(".option");
+        if(!opt) return;
+        const q=opt.dataset.q, o=opt.dataset.o;
+        document.querySelectorAll(`label[data-q="${q}"]`).forEach(el=>el.classList.remove("selected"));
+        opt.classList.add("selected");
+        document.querySelector(`input[name="q${q}"][value="${o}"]`).checked = true;
+      });
+      document.getElementById("quizForm").addEventListener("submit", e=>{
         e.preventDefault();
-        const answers = [];
-        for (let i = 0; i < test.questions.length; i++) {
-          const selected = document.querySelector(`input[name="q${i}"]:checked`);
-          answers.push(selected ? parseInt(selected.value) : -1);
-        }
-        localStorage.setItem("quizCode", code);
-        localStorage.setItem("userAnswers", JSON.stringify(answers));
-        window.location.href = `2.html?code=${code}`;
+        const answers = test.questions.map((_,i)=>{
+          const sel = document.querySelector(`input[name="q${i}"]:checked`);
+          return sel ? +sel.value : -1;
+        });
+        localStorage.setItem("quiz_"+code+"_ans", JSON.stringify(answers));
+        location.href = "2.html?code="+code;
       });
     }
   </script>
