@@ -1,34 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Score</title>
+  <title>Result</title>
   <script src="data.js"></script>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family:sans-serif; padding:40px 20px; background:#eef9f9; max-width:370px; margin:auto; text-align:center; }
-    h1 { font-size:20px; margin-bottom:12px;}
-    .score-box { font-size:18px; padding:20px; background:#fff; border-radius:8px; margin-bottom:20px; }
-    button { width:100%; padding:12px; font-size:16px; background:#007bff; color:#fff; border:none; border-radius:8px; cursor:pointer; }
+    body { font-family: sans-serif; text-align: center; background: #eef; padding: 40px 20px; max-width: 370px; margin: auto; }
+    .score-box { background: #fff; padding: 30px; border-radius: 12px; animation: popIn 0.4s ease; }
+    @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .feedback { font-size: 18px; margin-top: 12px; font-weight: bold; color: #333; }
+    button { margin-top: 20px; padding: 12px 20px; background: #007bff; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h1 id="quizTitle">Loading...</h1>
-  <div id="scoreBox" class="score-box">...</div>
-  <button id="reviewBtn">Review Answers</button>
-
+  <div class="score-box">
+    <h2 id="score"></h2>
+    <div id="feedback" class="feedback"></div>
+    <button onclick="review()">Review Answers</button>
+  </div>
   <script>
-    function get(n){return new URLSearchParams(location.search).get(n);}
-    const code = get("code"), t = allTests[code];
-    const ans = JSON.parse(localStorage.getItem("quiz_"+code+"_ans")||"[]");
-    if(!t){ document.getElementById("quizTitle").textContent="Invalid"; document.getElementById("scoreBox").textContent=""; }
-    else {
-      document.getElementById("quizTitle").textContent=t.title;
-      let s=0;
-      t.questions.forEach((q,i)=>{ if(ans[i]===q.answer) s++; });
-      document.getElementById("scoreBox").textContent=`You scored ${s} of ${t.questions.length}`;
-      document.getElementById("reviewBtn").onclick = ()=> location.href = "3.html?code="+code;
-    }
+    const code = new URLSearchParams(location.search).get("code"), t = allTests[code];
+    const ans = JSON.parse(localStorage.getItem("quiz_" + code + "_ans") || "[]");
+    let correct = 0;
+    t.questions.forEach((q, i) => { if (ans[i] === q.answer) correct++; });
+    document.getElementById("score").textContent = `Score: ${correct}/${t.questions.length}`;
+    const rate = correct / t.questions.length;
+    let feedback = "Try Again, Better!";
+    if (rate >= 0.8) feedback = "Excellent, Pal!";
+    else if (rate >= 0.5) feedback = "You Can Do Better!";
+    document.getElementById("feedback").textContent = feedback;
+    function review() { location.href = `3.html?code=${code}`; }
   </script>
 </body>
 </html>
