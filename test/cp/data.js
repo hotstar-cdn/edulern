@@ -1,57 +1,119 @@
-// data.js
-const allTests = {
-  ttm1: {
-    title: "Math Test",
+const quizzes = {
+  phy101: {
+    title: "Physics Test",
     questions: [
       {
-        question: "What is 5 + 3?",
-        questionImage: null,
+        id: 1,
+        type: "text",
+        difficulty: "medium",
+        question: "Which of the following statements is true for conservative forces?",
         options: [
-          { text: "6", image: null },
-          { text: "8", image: null },
-          { text: "10", image: null },
-          { text: "7", image: null }
+          { text: "Work depends on path" },
+          { text: "Always zero" },
+          { text: "Work is path-independent" },
+          { text: "Work is non-recoverable" }
         ],
-        answer: 1
+        correct: 2,
+        solution: "Conservative forces do work independent of the path."
       },
       {
-        question: "Identify the shape:",
-        questionImage: "triangle1.jpg",
+        id: 2,
+        type: "image",
+        question: "Identify the motion type from the graph below:",
+        questionImage: "img/phy_q1.png",
         options: [
-          { text: "", image: "circle1.jpg" },
-          { text: "", image: "triangle2.jpg" },
-          { text: "", image: "square1.jpg" },
-          { text: "", image: "hexagon1.jpg" }
+          { image: "img/phy_a1.png" },
+          { image: "img/phy_a2.png" },
+          { image: "img/phy_a3.png" },
+          { image: "img/phy_a4.png" }
         ],
-        answer: 1
+        correct: 0,
+        solutionImage: "img/phy_solution1.png"
+      },
+      {
+        id: 3,
+        type: "text",
+        question: "Gravitational field lines point:",
+        options: [
+          { text: "Outward from mass" },
+          { text: "Toward mass" },
+          { text: "Randomly" },
+          { text: "Only upward" }
+        ],
+        correct: 1,
+        solution: "Gravitational lines point toward mass."
+      },
+      {
+        id: 4,
+        type: "text+image",
+        question: "Which diagram correctly shows electric field between two charges?",
+        options: [
+          { text: "A", image: "img/field1.png" },
+          { text: "B", image: "img/field2.png" },
+          { text: "C", image: "img/field3.png" },
+          { text: "D", image: "img/field4.png" }
+        ],
+        correct: 0,
+        solution: "Field lines go from +ve to -ve charges."
       }
     ]
   },
 
-  sci9: {
-    title: "Science Grade 9",
+  chem101: {
+    title: "Chemistry Test",
     questions: [
       {
-        question: "What planet is known as the Red Planet?",
-        questionImage: null,
+        id: 1,
+        type: "text",
+        question: "Which of the following is an alkali metal?",
         options: [
-          { text: "Earth", image: null },
-          { text: "Mars", image: null },
-          { text: "Jupiter", image: null },
-          { text: "Venus", image: null }
+          { text: "Calcium" },
+          { text: "Potassium" },
+          { text: "Iron" },
+          { text: "Zinc" }
         ],
-        answer: 1
+        correct: 1,
+        solution: "Potassium is an alkali metal in Group 1."
       },
       {
-        question: "Which of these is a gas at room temperature?",
-        questionImage: null,
+        id: 2,
+        type: "image",
+        question: "Identify this molecular structure:",
+        questionImage: "img/chem_q1.png",
         options: [
-          { text: "Water", image: null },
-          { text: "Oxygen", image: null },
-          { text: "Iron", image: null },
-          { text: "Mercury", image: null }
+          { text: "Water", image: "img/chem_a1.png" },
+          { text: "Ammonia", image: "img/chem_a2.png" },
+          { text: "Methane", image: "img/chem_a3.png" },
+          { text: "Carbon Dioxide", image: "img/chem_a4.png" }
         ],
-        answer: 1
+        correct: 2,
+        solutionImage: "img/chem_solution1.png"
+      },
+      {
+        id: 3,
+        type: "text",
+        question: "Which pH value represents a strong acid?",
+        options: [
+          { text: "1" },
+          { text: "7" },
+          { text: "9" },
+          { text: "14" }
+        ],
+        correct: 0,
+        solution: "Strong acids have low pH (closer to 0)."
+      },
+      {
+        id: 4,
+        type: "text+image",
+        question: "Which reaction is exothermic?",
+        options: [
+          { text: "A", image: "img/reaction1.png" },
+          { text: "B", image: "img/reaction2.png" },
+          { text: "C", image: "img/reaction3.png" },
+          { text: "D", image: "img/reaction4.png" }
+        ],
+        correct: 1,
+        solution: "Exothermic reactions release energy, often shown with downward energy curves."
       }
     ]
   }
