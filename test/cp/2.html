@@ -1,95 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Review Answers</title>
+  <meta charset="UTF-8">
+  <title>Quiz Result</title>
+  <script src="data.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f1f5fb;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-      background: #fff;
-      font-weight: bold;
-      font-size: 1.2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .controls {
-      padding: 1rem;
-      background: #fff;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .tab-bar {
-      display: flex;
-      border-bottom: 2px solid #ddd;
-      background: #fff;
-    }
-    .tab-bar div {
-      padding: 0.8rem 1rem;
-      cursor: pointer;
-      font-weight: 500;
-      border-bottom: 3px solid transparent;
-    }
-    .tab-bar div.active {
-      border-bottom: 3px solid #007bff;
-      color: #007bff;
-    }
-    .question {
-      margin: 1rem;
-      background: #fff;
-      border-radius: 10px;
-      padding: 1rem;
-    }
-    .easy {
-      background: #d4f8e8;
-      color: green;
-      padding: 0.2rem 0.6rem;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      display: inline-block;
-    }
-    .view {
-      color: #007bff;
-      text-align: center;
-      margin-top: 1rem;
-      display: block;
-      font-weight: bold;
-    }
+    body { font-family: Arial; padding: 40px 20px; background: #e0f7fa; text-align: center; max-width: 370px; margin: auto; }
+    h2 { font-size: 22px; margin-bottom: 10px; }
+    .score { font-size: 20px; margin: 20px 0; }
+    button { padding: 10px 20px; font-size: 16px; }
   </style>
 </head>
 <body>
-  <header>← Review Answers</header>
+  <h2 id="quizTitle">Loading...</h2>
+  <div id="score" class="score"></div>
+  <button id="reviewBtn">Review Answers</button>
 
-  <div class="controls">
-    <button>Filter</button>
-    <button>Physics</button>
-  </div>
+  <script>
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
 
-  <div class="tab-bar">
-    <div class="active">Unattempted(10)</div>
-    <div>Incorrect(0)</div>
-    <div>Correct(0)</div>
-  </div>
+    const code = getQueryParam('code');
+    const test = allTests[code];
+    const userAnswers = JSON.parse(localStorage.getItem("userAnswers") || "[]");
 
-  <div class="question">
-    <h3>Question 1 <span class="easy">EASY</span></h3>
-    <p>A man stands in front of a hillock and fires a gun...</p>
-    <a class="view">View solution</a>
-  </div>
+    if (!test) {
+      document.getElementById("quizTitle").textContent = "Invalid test code.";
+    } else {
+      document.getElementById("quizTitle").textContent = test.title;
 
-  <div class="question">
-    <h3>Question 2 <span class="easy">EASY</span></h3>
-    <p>For given wave intensity ratio is (I1/I2)</p>
-    <img src="wave.png" alt="Wave" width="100%" />
-    <a class="view">View solution</a>
-  </div>
+      let score = 0;
+      test.questions.forEach((q, i) => {
+        if (userAnswers[i] === q.answer) score++;
+      });
+
+      document.getElementById("score").textContent = `You scored ${score} out of ${test.questions.length}`;
+    }
+
+    document.getElementById("reviewBtn").addEventListener("click", () => {
+      window.location.href = `3.html?code=${code}`;
+    });
+  </script>
 </body>
 </html>
