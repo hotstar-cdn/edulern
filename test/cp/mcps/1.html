@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Quiz in Progress</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container" id="quiz-page-container">
+        <div class="header" id="quiz-main-header"></div>
+        <div class="quiz-carousel" id="quiz-carousel">
+            <div class="quiz-track" id="quiz-track"></div>
+        </div>
+        <div class="navigation-buttons" id="quiz-navigation"></div>
+        <div id="error-container" style="display: none;"></div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // --- SVG ICONS (self-contained for portability) ---
+        const icons = {
+            prev: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/></svg>`,
+            next: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/></svg>`,
+            submit: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>`,
+            subject: {
+                Chemistry: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-radioactive" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/><path d="M9.653 5.496A2.996 2.996 0 0 0 8 5c-1.012 0-1.9.49-2.484 1.252A3.001 3.001 0 0 1 8 5.5c.637 0 1.213.2 1.653.5l-.653.498zm-1.306 1.062c.13.41.195.842.195 1.282 0 .44-.065.872-.195 1.282l.653.498A3.001 3.001 0 0 0 11 8c0-1.012-.49-1.9-1.252-2.484A2.999 2.999 0 0 1 10.5 8c0 .637-.2 1.213-.5 1.653l-.498-.653zM5.5 8a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0z"/></svg>`,
+                Physics: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightbulb-fill" viewBox="0 0 16 16"><path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A6 6 0 0 1 2 6zm6 8.5a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 0 1H8.5a.5.5 0 0 1-.5-.5z"/></svg>`,
+            },
+            error: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>`
+        };
+        document.addEventListener('DOMContentLoaded', () => {
+            const pageContainer = document.getElementById('quiz-page-container');
+            const mainHeader = document.getElementById('quiz-main-header');
+            const carousel = document.getElementById('quiz-carousel');
+            const track = document.getElementById('quiz-track');
+            const navigation = document.getElementById('quiz-navigation');
+            const errorContainer = document.getElementById('error-container');
+            let currentQuestionIndex = 0, userAnswers = {}, quizQuestions = [], quizCode = '', quizStartTime;
+            let isSwiping = false, startX = 0, currentTranslate = 0;
+
+            function showError(message) {
+                pageContainer.style.display = 'none';
+                errorContainer.style.display = 'block';
+                errorContainer.innerHTML = `<div class="error-message"><div class="icon">${icons.error}</div><h3>Quiz Error</h3><p>${message}</p></div>`;
+            }
+
+            function initQuiz() {
+                const params = new URLSearchParams(window.location.search);
+                quizCode = params.get('code');
+                const count = parseInt(params.get('count'), 10);
+                if (!quizCode || !quizData[quizCode]) { showError("The quiz code is invalid."); return; }
+                if (!count || count <= 0) { showError("A valid number of questions was not specified."); return; }
+                quizQuestions = quizData[quizCode].questions.slice(0, count);
+                if (quizQuestions.length === 0) { showError("This quiz has no questions available."); return; }
+                quizStartTime = new Date();
+                renderQuiz();
+                setupEventListeners();
+            }
+
+            function renderQuiz() {
+                const subjectIcon = icons.subject[quizData[quizCode].subject] || '';
+                mainHeader.innerHTML = `<h1>${subjectIcon}${quizData[quizCode].title}</h1><div class="quiz-header" id="question-counter">${currentQuestionIndex + 1} / ${quizQuestions.length}</div>`;
+                track.innerHTML = quizQuestions.map(question => {
+                    const optionsHtml = question.options.map(option => `<button class="option" data-question-id="${question.id}" data-option-id="${option.id}"><div class="option-content"><span class="option-id">${option.id}</span><div class="option-value">${option.text ? `<span>${option.text}</span>` : ''}${option.image ? `<div class="option-image"><img src="${option.image}" alt="Option ${option.id}"></div>` : ''}</div></div></button>`).join('');
+                    return `<div class="quiz-slide"><div class="question-card"><p class="question-text">${question.question_text}</p>${question.question_image ? `<div class="question-image"><img src="${question.question_image}" alt="Question Image"></div>` : ''}</div><div class="options-container">${optionsHtml}</div></div>`;
+                }).join('');
+                updateNavControls();
+                updateAllOptionSelections();
+            }
+
+            function goToSlide(index) {
+                if (index < 0 || index >= quizQuestions.length) return;
+                currentQuestionIndex = index;
+                track.style.transition = 'transform 0.4s ease-in-out';
+                track.style.transform = `translateX(-${index * carousel.offsetWidth}px)`;
+                document.getElementById('question-counter').textContent = `${index + 1} / ${quizQuestions.length}`;
+                updateNavControls();
+            }
+
+            function updateNavControls() {
+                navigation.innerHTML = `<button class="btn btn-secondary" id="prev-btn" ${currentQuestionIndex === 0 ? 'disabled' : ''}>${icons.prev} Prev</button>${currentQuestionIndex === quizQuestions.length - 1 ? `<button class="btn btn-primary" id="submit-btn">${icons.submit} Submit</button>`: `<button class="btn btn-primary" id="next-btn">${icons.next} Next</button>`}`;
+                navigation.querySelector('#next-btn')?.addEventListener('click', () => goToSlide(currentQuestionIndex + 1));
+                navigation.querySelector('#prev-btn')?.addEventListener('click', () => goToSlide(currentQuestionIndex - 1));
+                navigation.querySelector('#submit-btn')?.addEventListener('click', submitTest);
+            }
+
+            function handleOptionClick(e) {
+                const button = e.target.closest('.option');
+                if (!button) return;
+                const { questionId, optionId } = button.dataset;
+                userAnswers[questionId] = optionId;
+                document.querySelectorAll(`.option[data-question-id="${questionId}"]`).forEach(opt => opt.classList.remove('selected'));
+                button.classList.add('selected');
+            }
+            
+            function updateAllOptionSelections() {
+                for (const questionId in userAnswers) {
+                    const optionId = userAnswers[questionId];
+                    const optionEl = document.querySelector(`.option[data-question-id="${questionId}"][data-option-id="${optionId}"]`);
+                    optionEl?.classList.add('selected');
+                }
+            }
+
+            function setupEventListeners() {
+                carousel.addEventListener('touchstart', touchStart);
+                carousel.addEventListener('touchmove', touchMove);
+                carousel.addEventListener('touchend', touchEnd);
+                track.addEventListener('click', handleOptionClick);
+            }
+
+            function touchStart(event) { startX = event.touches[0].clientX; isSwiping = true; track.style.transition = 'none'; }
+            function touchMove(event) { if (!isSwiping) return; currentTranslate = event.touches[0].clientX - startX - (currentQuestionIndex * carousel.offsetWidth); track.style.transform = `translateX(${currentTranslate}px)`; }
+            function touchEnd() {
+                if (!isSwiping) return;
+                isSwiping = false;
+                const movedBy = currentTranslate + (currentQuestionIndex * carousel.offsetWidth);
+                if (movedBy < -50 && currentQuestionIndex < quizQuestions.length - 1) goToSlide(currentQuestionIndex + 1);
+                else if (movedBy > 50 && currentQuestionIndex > 0) goToSlide(currentQuestionIndex - 1);
+                else goToSlide(currentQuestionIndex);
+            }
+
+            function submitTest() {
+                const attemptId = Date.now();
+                let correctCount = 0;
+                let incorrectQuestions = [];
+                quizQuestions.forEach(q => { if (userAnswers[q.id] === q.correct_answer) correctCount++; else incorrectQuestions.push(q.id); });
+                const newResult = { attemptId, quizCode, title: quizData[quizCode].title, timestamp: new Date().toISOString(), questions: quizQuestions, userAnswers, totalTime: Math.round((new Date() - quizStartTime) / 1000), totalQuestions: quizQuestions.length, correctCount, incorrectQuestions };
+                let history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+                history.push(newResult);
+                localStorage.setItem('quizHistory', JSON.stringify(history));
+                window.location.href = `2_results.html?attemptId=${attemptId}`;
+            }
+            initQuiz();
+        });
+    </script>
+</body>
+</html>
