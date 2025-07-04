@@ -1,52 +1,272 @@
-// data.js
-
 const quizData = {
   chem101: {
-    title: "Chemistry Basics",
-    subject: "Chemistry",
+    title: "How to Organisms Reproduce?",
+    subject: "Biology",
     questions: [
       {
         id: "c1q1",
         difficulty: "Medium",
-        question_text: "Which are chain isomers?",
-        question_image: null, // No main image for this question
+        question_text: "True fruits are those which are developed from –",
+        question_image: null,
         options: [
-          { id: "A", text: null, image: "images/chem_q1_optA.png" },
-          { id: "B", text: null, image: "images/chem_q1_optB.png" },
-          { id: "C", text: null, image: "images/chem_q1_optC.png" },
-          { id: "D", text: null, image: "images/chem_q1_optD.png" },
+          { id: "A", text: "ovules of embryo sac", image: null },
+          { id: "B", text: "anthers of stamen", image: null },
+          { id: "C", text: "pistil of gynoecium", image: null },
+          { id: "D", text: "ovary of a flower", image: null },
         ],
-        correct_answer: "C",
-        solution_text: "Chain isomers are compounds with the same molecular formula but different arrangements of the carbon skeleton. In option C, the first compound is pentan-2-ol and the second is 3-methylbutan-2-ol. Both have the formula C5H12O but different carbon chains (a straight chain of 5 vs. a branched chain of 4).",
+        correct_answer: "D",
+        solution_text: "True fruits develop from ovary of a flower.",
         solution_image: null,
       },
       {
         id: "c1q2",
-        difficulty: "Easy",
-        question_text: "What is the chemical symbol for Gold?",
+        difficulty: "Medium",
+        question_text: "Sperms move by ",
         question_image: null,
         options: [
-          { id: "A", text: "Ag", image: null },
-          { id: "B", text: "Go", image: null },
-          { id: "C", text: "Au", image: null },
-          { id: "D", text: "Gd", image: null },
+          { id: "A", text: "head", image: null },
+          { id: "B", text: "Tail", image: null },
+          { id: "C", text: "Both A and B", image: null },
+          { id: "D", text: "All of these", image: null },
         ],
-        correct_answer: "C",
-        solution_text: "The chemical symbol for Gold is Au, derived from its Latin name, 'aurum'.",
+        correct_answer: "B",
+        solution_text: "Sperms move by tail.",
         solution_image: null,
       },
-      // Add more chemistry questions here...
+      {
+        id: "c1q3",
+        difficulty: "Medium",
+        question_text: `Which of the following statements are true for flowers?
+(i) flowers are always bisexual
+(ii) they contain sexual reproductive organs
+(iii) they are produced in all groups of plants
+(iv) after fertilisation they give rise to fruits`,
+        question_image: null,
+        options: [
+          { id: "A", text: "All are correct", image: null },
+          { id: "B", text: "only 2", image: null },
+          { id: "C", text: "1 and 3", image: null },
+          { id: "D", text: "2 and 4", image: null },
+        ],
+        correct_answer: "D",
+        solution_text: "Flowers contain reproductive structures and post fertilisation ovary changes to fruit.",
+        solution_image: null,
+      },
+      {
+        id: "c1q4",
+        difficulty: "Easy",
+        question_text: "At the time of entering into ovule, pollen tube has",
+        question_image: null,
+        options: [
+          { id: "A", text: "1 Male gametes", image: null },
+          { id: "B", text: "2 Male gametes", image: null },
+          { id: "C", text: "3 Male gametes", image: null },
+          { id: "D", text: "4 Male gametes", image: null },
+        ],
+        correct_answer: "B",
+        solution_text: "The generative cell in the pollen tube divides to produce two male nuclei.",
+        solution_image: null,
+      },
+      {
+        id: "c1q5",
+        difficulty: "Easy",
+        question_text: "Cell was discovered by -",
+        question_image: null,
+        options: [
+          { id: "A", text: "Robert Hook", image: null },
+          { id: "B", text: "Alex Paul", image: null },
+          { id: "C", text: "George John Mendel", image: null },
+          { id: "D", text: "Ricky Brown", image: null },
+        ],
+        correct_answer: "A",
+        solution_text: "Robert Hooke discovered the dead cell in the bark of a tree.",
+        solution_image: null,
+      },
+      {
+        id: "c1q6",
+        difficulty: "Easy",
+        question_text: "___________ is the process of fusion of the male and female gametes to form a diploid zygote.",
+        question_image: null,
+        options: [
+          { id: "A", text: "Pollination", image: null },
+          { id: "B", text: "Fertilization", image: null },
+          { id: "C", text: "Binary Fission", image: null },
+          { id: "D", text: "None of Above", image: null },
+        ],
+        correct_answer: "B",
+        solution_text: "Fertilization is the process of fusion of the male and female gametes to form a diploid zygote.",
+        solution_image: null,
+      },
+      {
+        id: "c1q7",
+        difficulty: "Easy",
+        question_text: "Fertilization of ovum in human takes place in -",
+        question_image: null,
+        options: [
+          { id: "A", text: "Ovary", image: null },
+          { id: "B", text: "Cervix", image: null },
+          { id: "C", text: "Both A and B", image: null },
+          { id: "D", text: "Oviduct", image: null },
+        ],
+        correct_answer: "D",
+        solution_text: "Fertilization takes place in the oviduct (fallopian tube).",
+        solution_image: null,
+      },
+      {
+        id: "c1q8",
+        difficulty: "Easy",
+        question_text: `Identify the incorrect statement –
+(i) In 1831, Robert Brown discovered the cell.
+(ii) Viruses are prokaryotes.
+(iii) The covering membrane of vacuole is called tonoplast.
+(iv) Lysosomes are also known as suicidal bags.
+(v) Chloroplast is a plastid which contain green colour pigment called chlorophyll.`,
+        question_image: null,
+        options: [
+          { id: "A", text: "only 1 and 2", image: null },
+          { id: "B", text: "only 3", image: null },
+          { id: "C", text: "only 2,3 and 4", image: null },
+          { id: "D", text: "All", image: null },
+        ],
+        correct_answer: "A",
+        solution_text: "In 1831, Robert Brown discovered the nucleus. Viruses are neither prokaryote nor eukaryote.",
+        solution_image: null,
+      },
+      {
+        id: "c1q9",
+        difficulty: "Easy",
+        question_text: "This is not the part of embryo –",
+        question_image: null,
+        options: [
+          { id: "A", text: "Sperms", image: null },
+          { id: "B", text: "radicle", image: null },
+          { id: "C", text: "Seed Coat", image: null },
+          { id: "D", text: "plumule", image: null },
+        ],
+        correct_answer: "C",
+        solution_text: "Seed coat is not part of the embryo; it's a protective layer.",
+        solution_image: null,
+      },
+      {
+        id: "c1q10",
+        difficulty: "Easy",
+        question_text: "Which of these secretes seminal fluid?",
+        question_image: null,
+        options: [
+          { id: "A", text: "pancreas", image: null },
+          { id: "B", text: "Prostate Gland", image: null },
+          { id: "C", text: "Seminal vesicle", image: null },
+          { id: "D", text: "both 2 and 3", image: null },
+        ],
+        correct_answer: "D",
+        solution_text: `Prostate gland secretes watery fluid.
+Seminal vesicle secretes fructose for sperm mobility.
+Cowper gland neutralizes acidic urine residue.
+All contribute to seminal fluid.`,
+        solution_image: null,
+      },
+      {
+        id: "c1q11",
+        difficulty: "Easy",
+        question_text: "Seeds are",
+        question_image: null,
+        options: [
+          { id: "A", text: "metabolically inactive", image: null },
+          { id: "B", text: "dormant", image: null },
+          { id: "C", text: "resting stage", image: null },
+          { id: "D", text: "All of the Above", image: null },
+        ],
+        correct_answer: "D",
+        solution_text: "Seeds are dormant, metabolically inactive, and represent a resting stage.",
+        solution_image: null,
+      },
+      {
+        id: "c1q12",
+        difficulty: "Easy",
+        question_text: "The embryo in humans gets nutrition from the mother’s blood with the help of a special tissue called:",
+        question_image: null,
+        options: [
+          { id: "A", text: "Placenta", image: null },
+          { id: "B", text: "Villi", image: null },
+          { id: "C", text: "Heart", image: null },
+          { id: "D", text: "All of the Above", image: null },
+        ],
+        correct_answer: "A",
+        solution_text: "The embryo gets nutrition from the mother's blood with the help of a special tissue called placenta.",
+        solution_image: null,
+      },
+      {
+        id: "c1q13",
+        difficulty: "Easy",
+        question_text: "The process of attachment of embryo in the endometrium of uterus is known as",
+        question_image: null,
+        options: [
+          { id: "A", text: "placentation", image: null },
+          { id: "B", text: "implantation", image: null },
+          { id: "C", text: "gestation", image: null },
+          { id: "D", text: "All of the Above", image: null },
+        ],
+        correct_answer: "B",
+        solution_text: "Implantation is the process of embryo attachment to the endometrium wall of uterus.",
+        solution_image: null,
+      },
+      {
+        id: "c1q14",
+        difficulty: "Easy",
+        question_text: "Fertilization in plants occurs in the :-",
+        question_image: null,
+        options: [
+          { id: "A", text: "Embryo Sac", image: null },
+          { id: "B", text: "Style", image: null },
+          { id: "C", text: "Stigma", image: null },
+          { id: "D", text: "Both A and C", image: null },
+        ],
+        correct_answer: "A",
+        solution_text: "Fertilization takes place in the embryo sac inside the ovule where the egg cell is located.",
+        solution_image: null,
+      },
+      {
+        id: "c1q15",
+        difficulty: "Easy",
+        question_text: "Female sex hormone(s) is/are –",
+        question_image: null,
+        options: [
+          { id: "A", text: "progesterone", image: null },
+          { id: "B", text: "Estrogen", image: null },
+          { id: "C", text: "testosterone", image: null },
+          { id: "D", text: "Both A and B", image: null },
+        ],
+        correct_answer: "D",
+        solution_text: "Female sex hormones include estrogen and progesterone.",
+        solution_image: null,
+      },
+      {
+        id: "c1q16",
+        difficulty: "Easy",
+        question_text: "Which of the following is the correct sequence of events of sexual reproduction in a flower?",
+        question_image: null,
+        options: [
+          { id: "A", text: "Pollination, fertilization, seedling, embryo", image: null },
+          { id: "B", text: "Seedling, embryo, fertilization, pollination", image: null },
+          { id: "C", text: "Pollination, fertilization, embryo, seedling", image: null },
+          { id: "D", text: "Embryo, seedling, pollination, fertilization", image: null },
+        ],
+        correct_answer: "C",
+        solution_text: "Pollination is followed by fertilization, forming an embryo, which grows into a seedling.",
+        solution_image: null,
+      },
     ],
   },
+
   phy101: {
-    title: "Physics: Thermal Expansion",
+    title: "Thermal Expansion",
     subject: "Physics",
     questions: [
       {
         id: "p1q1",
         difficulty: "Medium",
-        question_text: "A glass flask of volume one litre at 0°C is filled, level full of mercury at this temperature. The flask and mercury are now heated to 100°C. How much mercury will spill out if coefficient of volume expansion of mercury is 1.82 x 10⁻⁴/°C and linear expansion of glass is 0.1 x 10⁻⁴/°C respectively?",
-        question_image: null, // This is a text-only question
+        question_text: "A 1-litre glass flask is full of mercury at 0°C. How much mercury will spill out if heated to 100°C? (γ_mercury = 1.82x10⁻⁴/°C, α_glass = 0.1x10⁻⁴/°C)",
+        question_image: null,
         options: [
           { id: "A", text: "21.2 cc", image: null },
           { id: "B", text: "15.2 cc", image: null },
@@ -54,25 +274,11 @@ const quizData = {
           { id: "D", text: "2.12 cc", image: null },
         ],
         correct_answer: "B",
-        solution_text: "In case of thermal expansion of liquid, the change in volume of liquid relative to the container is given by: ΔV = V(γ_L - γ_S)Δθ. Here, V = 1 litre = 1000 cc. The coefficient of volume expansion for glass γ_S = 3α_g = 3 * (0.1 x 10⁻⁴) = 0.3 x 10⁻⁴/°C. Therefore, ΔV = 1000 * (1.82 x 10⁻⁴ - 0.3 x 10⁻⁴) * 100 = 1000 * (1.52 x 10⁻⁴) * 100 = 15.2 cc.",
-        solution_image: "images/phy_q1.png", // Image showing the formula/solution
-      },
-       {
-        id: "p1q2",
-        difficulty: "Hard",
-        question_text: "Which law of thermodynamics states that entropy of an isolated system always increases?",
-        question_image: null,
-        options: [
-          { id: "A", text: "First Law", image: null },
-          { id: "B", text: "Second Law", image: null },
-          { id: "C", text: "Third Law", image: null },
-          { id: "D", text: "Zeroth Law", image: null },
-        ],
-        correct_answer: "B",
-        solution_text: "The Second Law of Thermodynamics deals with entropy. It states that the total entropy of an isolated system can only increase over time. It can remain constant in ideal cases where the system is in a steady state (equilibrium) or undergoing a reversible process.",
+        solution_text: "ΔV = V(γ_L - γ_S)Δθ, with γ_S = 3α_g = 0.3x10⁻⁴. ΔV = 1000*(1.82 - 0.3)x10⁻⁴*100 = 15.2 cc.",
         solution_image: null,
       },
-      // Add more physics questions here...
     ],
   },
 };
+
+export default quizData;
