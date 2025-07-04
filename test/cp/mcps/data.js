@@ -1,8 +1,8 @@
 // data.js
 const quizData = {
   chem101: {
-    title: "Chemistry Basics",
-    subject: "Chemistry",
+    title: "How to Organisms Reproduce?",
+    subject: "Biology",
     questions: [
        {
         id: "c1q1",
