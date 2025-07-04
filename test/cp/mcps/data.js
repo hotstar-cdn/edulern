@@ -6,7 +6,7 @@ const quizData = {
     questions: [
        {
         id: "c1q1",
-        difficulty: "Easy",
+        difficulty: "Medium",
         question_text: "True fruits are those which are developed from –",
         question_image: null, // No main image for this question
         options: [
@@ -21,7 +21,7 @@ const quizData = {
       },
  {
         id: "c1q2",
-        difficulty: "Easy",
+        difficulty: "Medium",
         question_text: "Sperms move by ",
         question_image: null, // No main image for this question
         options: [
@@ -36,7 +36,7 @@ const quizData = {
       },
  {
         id: "c1q3",
-        difficulty: "Easy",
+        difficulty: "Medium",
         question_text: "Which of the following statements are true for flowers?
 (i) flowers are always bisexual
 (ii) they contain sexual reproductive organs
