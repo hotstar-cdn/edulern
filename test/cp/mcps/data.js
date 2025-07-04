@@ -256,8 +256,6 @@ Cowper gland - neutralize the acidic nature in urethera due to urine. All these 
         solution_text: "Pollination, fertilization, embryo, seedling",
         solution_image: null,
       },
-
-
     ],
   },
   phy101: {
