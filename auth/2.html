@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Class Schedule</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-blue: #007bff;
+            --light-bg: #f8f9fa;
+            --border-color: #e9ecef;
+            --text-dark: #212529;
+            --text-light: #6c757d;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 450px;
+            min-height: 100vh;
+            margin: 0 auto;
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a237e;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .notifications {
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .course-selector span {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .course-selector a {
+            font-size: 12px;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #673ab7;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        main {
+            flex-grow: 1;
+        }
+
+        .day-selector {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .day-selector button {
+            background: none;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        .day-selector button:hover {
+            color: var(--text-dark);
+        }
+
+        .day-selector button.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        #schedule-list {
+            padding: 10px 0;
+        }
+
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .time-slot {
+            width: 100px;
+            flex-shrink: 0;
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .item-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--light-bg);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+
+        .item-details {
+            flex-grow: 1;
+        }
+
+        .item-details .subject {
+            font-size: 12px;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .item-details .title {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 4px 0 0 0;
+        }
+        
+        .action-arrow {
+            font-size: 18px;
+            color: var(--text-light);
+        }
+        
+        #loading-message, #no-schedule-message {
+            text-align: center;
+            color: var(--text-light);
+            padding: 40px 20px;
+            font-size: 16px;
+        }
+
+        /* --- NEW: Notification Banner Styles --- */
+        #notification-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #28a745;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateY(-100%);
+            transition: transform 0.4s ease-in-out;
+        }
+        
+        #notification-banner.show {
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 370px) {
+            .time-slot {
+                width: 90px;
+                font-size: 13px;
+            }
+            .schedule-item {
+                padding: 15px 10px;
+            }
+            .item-details .title {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NEW: Notification Banner HTML -->
+    <div id="notification-banner">A new event was scheduled! The page will refresh.</div>
+    
+    <div id="app-container">
+        <header>
+            <div class="logo">ALLEN</div>
+            <div class="user-info">
+                <span class="notifications">
+                    <i class="fa-regular fa-bell"></i>
+                </span>
+                <div class="course-selector">
+                    <span id="course-name-display">Loading...</span>
+                    <a href="#">Change course</a>
+                </div>
+                <div class="user-avatar">V</div>
+            </div>
+        </header>
+
+        <main>
+            <nav class="day-selector">
+                <button data-day="Monday">M</button>
+                <button data-day="Tuesday">T</button>
+                <button data-day="Wednesday">W</button>
+                <button data-day="Thursday">T</button>
+                <button data-day="Friday">F</button>
+                <button data-day="Saturday">S</button>
+                <button data-day="Sunday">S</button>
+            </nav>
+            <div id="schedule-list">
+                <!-- Schedule items will be dynamically inserted here -->
+            </div>
+            <div id="loading-message">Loading schedule...</div>
+            <div id="no-schedule-message" style="display: none;">No events scheduled for this day.</div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAL5f8Mwk0qoaKBdXh0w2isNRCPSfgBL1g",
+            authDomain: "custom-practice-xperts.firebaseapp.com",
+            projectId: "custom-practice-xperts",
+            databaseURL: "https://custom-practice-xperts-default-rtdb.firebaseio.com",
+            storageBucket: "custom-practice-xperts.appspot.com",
+            messagingSenderId: "348008678781",
+            appId: "1:348008678781:web:a57738e0b878b4b8d97814",
+            measurementId: "G-D5V8DPLK6F"
+        };
+
+        // --- Initialize Firebase ---
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // --- Global State ---
+        let currentClassId = '';
+        let currentDay = '';
+        let initialDataLoaded = false;
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        let currentDbRef = null;
+
+        // --- DOM Elements ---
+        const scheduleList = document.getElementById('schedule-list');
+        const loadingMessage = document.getElementById('loading-message');
+        const noScheduleMessage = document.getElementById('no-schedule-message');
+        const daySelector = document.querySelector('.day-selector');
+        const notificationBanner = document.getElementById('notification-banner');
+
+        // --- Helper Functions ---
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            const [hours, minutes] = timeStr.split(':');
+            const h = parseInt(hours, 10);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const formattedHours = ((h + 11) % 12 + 1);
+            return `${String(formattedHours).padStart(2, '0')}:${minutes} ${ampm}`;
+        }
+        
+        function getIconForType(type) {
+            switch (type) {
+                case 'Class': return '<i class="fas fa-video"></i>';
+                case 'Test': return '<i class="fas fa-file-alt"></i>';
+                case 'Activity': return '<i class="fas fa-star"></i>';
+                default: return '<i class="fas fa-calendar-day"></i>';
+            }
+        }
+        
+        function createScheduleElement(item) {
+            const subjectText = item.type !== 'Activity' ? `${item.subject} ${item.type}` : item.type;
+            return `<div class="schedule-item">...</div>`; // Rest of the element from previous code
+        }
+        
+        function renderSchedule(data) {
+            scheduleList.innerHTML = '';
+            loadingMessage.style.display = 'none';
+
+            if (!data) {
+                noScheduleMessage.style.display = 'block';
+                return;
+            }
+
+            noScheduleMessage.style.display = 'none';
+            const scheduleItems = Object.values(data);
+            scheduleItems.sort((a, b) => a.startTime.localeCompare(b.startTime));
+            
+            scheduleItems.forEach(item => {
+                const subjectText = item.type !== 'Activity' ? `${item.subject} ${item.type}` : item.type;
+                scheduleList.innerHTML += `
+                    <div class="schedule-item">
+                        <div class="time-slot">${formatTime(item.startTime)} - ${formatTime(item.endTime)}</div>
+                        <div class="item-icon">${getIconForType(item.type)}</div>
+                        <div class="item-details">
+                            <p class="subject">${subjectText}</p>
+                            <p class="title">${item.title}</p>
+                        </div>
+                        <div class="action-arrow"><i class="fas fa-chevron-right"></i></div>
+                    </div>
+                `;
+            });
+        }
+        
+        // --- Core Logic ---
+        function showNotification() {
+            notificationBanner.classList.add('show');
+            // After banner is shown, refresh the page to get the new data in order
+            setTimeout(() => {
+                window.location.reload();
+            }, 2500); // 2.5 second delay to let user read the banner
+        }
+
+        function listenForRealtimeUpdates() {
+            // Detach any previous listeners to prevent duplicates
+            if (currentDbRef) {
+                currentDbRef.off();
+            }
+            
+            currentDbRef = database.ref(`schedules/${currentClassId}/${currentDay}`);
+            
+            // Listen for new children being added
+            currentDbRef.on('child_added', (snapshot) => {
+                // The 'initialDataLoaded' flag ensures this only fires for *new*
+                // items added AFTER the page has already loaded its initial data.
+                if (initialDataLoaded) {
+                    showNotification();
+                }
+            });
+        }
+
+        async function fetchAndRenderSchedule() {
+            scheduleList.innerHTML = '';
+            loadingMessage.style.display = 'block';
+            noScheduleMessage.style.display = 'none';
+            initialDataLoaded = false; // Reset flag for new fetch
+            
+            const scheduleRef = database.ref(`schedules/${currentClassId}/${currentDay}`);
+            try {
+                const snapshot = await scheduleRef.once('value');
+                const data = snapshot.val();
+                renderSchedule(data);
+                
+                // Set the flag to true ONLY after the initial data is fetched and rendered.
+                // A small timeout prevents a race condition with the 'on' listener.
+                setTimeout(() => {
+                    initialDataLoaded = true;
+                }, 500);
+
+            } catch (error) {
+                console.error("Error fetching schedule: ", error);
+                loadingMessage.textContent = 'Failed to load schedule.';
+            }
+        }
+        
+        function setActiveDay(selectedDay) {
+            currentDay = selectedDay;
+            document.querySelectorAll('.day-selector button').forEach(button => {
+                button.classList.toggle('active', button.dataset.day === selectedDay);
+            });
+            fetchAndRenderSchedule();
+            listenForRealtimeUpdates(); // Setup listener for the new day
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            currentClassId = params.get('class');
+
+            if (!currentClassId) {
+                document.getElementById('app-container').innerHTML = `<div id="loading-message">Error: Class not specified. Please use a URL like "?class=10".</div>`;
+                return;
+            }
+            
+            document.getElementById('course-name-display').textContent = `Class ${currentClassId.replace('-', ' ')}`;
+            
+            daySelector.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    setActiveDay(e.target.dataset.day);
+                }
+            });
+            
+            const todayName = days[new Date().getDay()];
+            setActiveDay(todayName); // Set initial active day and fetch data
+        });
+    </script>
+</body>
+</html>
