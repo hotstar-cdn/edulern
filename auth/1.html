@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Schedule Manager</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #1a237e;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="time"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1a237e;
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.2);
+        }
+
+        .time-inputs {
+            display: flex;
+            gap: 15px;
+        }
+
+        .time-inputs > div {
+            flex: 1;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #283593;
+            transform: translateY(-2px);
+        }
+
+        #status-message {
+            margin-top: 20px;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+
+        #status-message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            display: block;
+        }
+
+        #status-message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+
+        #subject-group {
+            transition: opacity 0.3s, max-height 0.3s;
+            overflow: hidden;
+            max-height: 100px;
+            opacity: 1;
+        }
+        
+        #subject-group.hidden {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Schedule an Event</h1>
+        <form id="schedule-form">
+            <div class="form-group">
+                <label for="class-select">Class</label>
+                <select id="class-select" required>
+                    <option value="6">Grade 6</option>
+                    <option value="7">Grade 7</option>
+                    <option value="8">Grade 8</option>
+                    <option value="9">Grade 9</option>
+                    <option value="10">Grade 10</option>
+                    <option value="11-NEET">11 NEET</option>
+                    <option value="11-JEE">11 JEE</option>
+                    <option value="12-NEET">12 NEET</option>
+                    <option value="12-JEE">12 JEE</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="day-select">Day of the Week</label>
+                <select id="day-select" required>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+            </div>
+             <div class="form-group">
+                <label for="event-type">Event Type</label>
+                <select id="event-type" required>
+                    <option value="Class">Class</option>
+                    <option value="Test">Test</option>
+                    <option value="Activity">Activity</option>
+                </select>
+            </div>
+            <div class="form-group" id="subject-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" placeholder="e.g., Physics, Maths" required>
+            </div>
+            <div class="form-group">
+                <label for="title">Title / Topic</label>
+                <input type="text" id="title" placeholder="e.g., Reflection from Plane Mirrors" required>
+            </div>
+            <div class="form-group time-inputs">
+                <div>
+                    <label for="start-time">Start Time</label>
+                    <input type="time" id="start-time" required>
+                </div>
+                <div>
+                    <label for="end-time">End Time</label>
+                    <input type="time" id="end-time" required>
+                </div>
+            </div>
+            <button type="submit">Add to Schedule</button>
+        </form>
+        <div id="status-message"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAL5f8Mwk0qoaKBdXh0w2isNRCPSfgBL1g",
+            authDomain: "custom-practice-xperts.firebaseapp.com",
+            projectId: "custom-practice-xperts",
+            databaseURL: "https://custom-practice-xperts-default-rtdb.firebaseio.com", // Make sure to add this for RTDB
+            storageBucket: "custom-practice-xperts.appspot.com",
+            messagingSenderId: "348008678781",
+            appId: "1:348008678781:web:a57738e0b878b4b8d97814",
+            measurementId: "G-D5V8DPLK6F"
+        };
+
+        // --- Initialize Firebase ---
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // --- DOM Elements ---
+        const form = document.getElementById('schedule-form');
+        const statusMessage = document.getElementById('status-message');
+        const eventTypeSelect = document.getElementById('event-type');
+        const subjectGroup = document.getElementById('subject-group');
+        const subjectInput = document.getElementById('subject');
+
+        // --- Event Listeners ---
+        
+        // Toggle subject visibility based on event type
+        eventTypeSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'Activity') {
+                subjectGroup.classList.add('hidden');
+                subjectInput.required = false;
+            } else {
+                subjectGroup.classList.remove('hidden');
+                subjectInput.required = true;
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Get form values
+            const classId = document.getElementById('class-select').value;
+            const day = document.getElementById('day-select').value;
+            const eventType = eventTypeSelect.value;
+            const title = document.getElementById('title').value;
+            const subject = eventType !== 'Activity' ? subjectInput.value : '';
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
+
+            // Create schedule object
+            const scheduleData = {
+                type: eventType,
+                title: title,
+                subject: subject,
+                startTime: startTime,
+                endTime: endTime,
+                timestamp: firebase.database.ServerValue.TIMESTAMP // Add a timestamp for potential sorting/filtering
+            };
+            
+            // Push data to Firebase Realtime Database
+            const scheduleRef = database.ref(`schedules/${classId}/${day}`);
+            scheduleRef.push(scheduleData)
+                .then(() => {
+                    displayStatus('Schedule added successfully!', 'success');
+                    form.reset();
+                    // Reset subject field visibility
+                    subjectGroup.classList.remove('hidden');
+                    subjectInput.required = true;
+                })
+                .catch((error) => {
+                    console.error('Error adding document: ', error);
+                    displayStatus(`Error: ${error.message}`, 'error');
+                });
+        });
+
+        // --- Helper Functions ---
+        function displayStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = type; // 'success' or 'error'
+            
+            // Hide the message after 5 seconds
+            setTimeout(() => {
+                statusMessage.className = '';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
