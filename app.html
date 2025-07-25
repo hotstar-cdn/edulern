@@ -1,1 +1,50 @@
-<iframe src="https://xperts-app.github.io/rd/c/s?class=10&subject=BIO" style="border:0px #ffffff none;" name="myiFrame" scrolling="no" frameborder="0" marginheight="0px" marginwidth="0px" height="100%" width="100%" allowfullscreen></iframe>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Embed XpertsApp</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      height: 100vh;
+    }
+
+    #iframeContainer {
+      width: 370px;
+      height: 100%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    @media (max-width: 400px) {
+      #iframeContainer {
+        width: 100vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="iframeContainer">
+    <iframe 
+      src="https://xperts-app.github.io/rd/c/s.html?class=10&subject=BIO" 
+      title="XpertsApp Biology Class 10">
+    </iframe>
+  </div>
+
+  <script>
+    // You can add dynamic height or other behaviors here if needed
+    // Currently not required
+  </script>
+</body>
+</html>
