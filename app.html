@@ -1,261 +1,242 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EduPlayer</title>
-  <style>
-    * {
-      outline: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body {
-      margin: 0;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      font-family: sans-serif;
-    }
-    .player-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 900px;
-      aspect-ratio: 16 / 9;
-      background: black;
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    #player {
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-    .center-controls {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: none;
-      gap: 40px;
-      z-index: 10;
-    }
-    .control-btn {
-      background: transparent;
-      border: none;
-      padding: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .control-btn svg {
-      width: 32px;
-      height: 32px;
-      fill: #ffffff;
-      transition: fill 0.2s ease;
-    }
-    .control-btn:hover svg {
-      fill: #00aaff;
-    }
-    .bottom-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 8px 12px;
-      display: none;
-      align-items: center;
-      gap: 10px;
-      z-index: 10;
-    }
-    .progress-bar {
-      flex: 1;
-      height: 6px;
-      background: #333;
-      border-radius: 4px;
-      cursor: pointer;
-      position: relative;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: #00aaff;
-      border-radius: 4px;
-    }
-    .bottom-bar span {
-      color: #fff;
-      font-size: 14px;
-      width: 50px;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduled Classes</title>
+    <style>
+        :root {
+            --primary-blue: #0d6efd; --text-dark: #212529; --text-light: #6c757d;
+            --text-danger: #dc3545; --page-bg: #f0f4f9; --white: #ffffff;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--page-bg); margin: 0; padding: 1.5rem 0;
+        }
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+        .date-filter-bar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; }
+        .filter-btn {
+            padding: 0.5rem 1rem; font-size: 0.9rem; font-weight: 600; border: none; border-radius: 99px;
+            cursor: pointer; background-color: var(--white); color: var(--text-dark);
+            transition: background-color 0.2s, color 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .filter-btn.active { background-color: var(--text-dark); color: var(--white); }
+        .carousel-container { position: relative; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .carousel-container::-webkit-scrollbar { display: none; }
+        .carousel-track { display: flex; gap: 16px; padding-bottom: 1rem; cursor: grab; user-select: none; min-height: 280px; align-items: flex-start; }
+        
+        /* --- FINAL, PIXEL-PERFECT CARD STYLING --- */
+        .class-card {
+            flex: 0 0 250px;
+            width: 250px;
+            /* CRITICAL FIX: REMOVED fixed height. The card is now flexible. */
+            background-color: var(--white);
+            border-radius: 24px; 
+            box-shadow: 0 6px 20px rgba(60, 64, 67, 0.1);
+            padding: 12px; /* Padding for the entire card */
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+            box-sizing: border-box; /* Ensures padding is included in the width */
+        }
+        .card-thumbnail { 
+            width: 100%; height: 120px; position: relative; background-color: #e0e0e0; 
+            overflow: hidden; flex-shrink: 0;
+            border-radius: 16px; 
+        }
+        .card-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .subject-tag {
+            position: absolute; top: 12px; left: 12px; background-color: var(--primary-blue); color: var(--white);
+            padding: 5px 12px; font-size: 0.75rem; font-weight: 600;
+            border-radius: 99px; 
+        }
+        .live-badge {
+            position: absolute; bottom: 10px; left: 12px; background-color: rgba(255, 255, 255, 0.9); color: var(--text-danger);
+            padding: 5px 12px; font-size: 0.8rem; font-weight: 600;
+            display: none; align-items: center; backdrop-filter: blur(5px);
+            border-radius: 99px;
+        }
+        .live-badge.visible { display: flex; }
+        .live-badge::before { content: ''; width: 8px; height: 8px; background-color: var(--text-danger); border-radius: 50%; margin-right: 6px; }
+        
+        .card-content {
+            padding-top: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; 
+        }
+        .card-title {
+            font-size: 1.2rem; font-weight: 600; margin: 0 0 8px 0; line-height: 1.3; color: var(--text-dark);
+            word-wrap: break-word; /* Allows title to wrap to multiple lines */
+        }
+        .card-status { 
+            font-size: 0.95rem; 
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+        .card-status .time { 
+            color: var(--text-danger);
+            font-weight: 700;
+        }
+        
+        /* THE DEFINITIVE BUTTON FIX */
+        .join-now-btn {
+            /* REMOVED width: 100% */
+            padding: 0.8rem 2.5rem; /* Sized by its own padding */
+            font-size: 1rem; font-weight: 600; color: var(--white);
+            background-color: var(--primary-blue); border: none; cursor: pointer;
+            text-decoration: none;
+            border-radius: 99px;
+            margin-top: auto; /* Pushes to the bottom */
+            align-self: center; /* Centers it horizontally */
+        }
+
+        #no-classes-message { width: 100%; text-align: center; color: var(--text-light); padding: 4rem 0; font-size: 1.2rem; display: none; }
+    </style>
 </head>
 <body>
-
-<div class="player-wrapper" id="wrapper">
-  <div id="player"></div>
-
-  <div class="center-controls" id="centerControls">
-    <button class="control-btn" id="rewind" title="Rewind 10s">
-      <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6L11 18zm1-12v12l8.5-6L12 6z"/></svg>
-    </button>
-    <button class="control-btn" id="playPause" title="Play/Pause">
-      <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-    </button>
-    <button class="control-btn" id="forward" title="Forward 10s">
-      <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6L13 6zm-1 12V6l-8.5 6L12 18z"/></svg>
-    </button>
-  </div>
-
-  <div class="bottom-bar" id="bottomBar">
-    <span id="currentTime">0:00</span>
-    <div class="progress-bar" id="progressBar">
-      <div class="progress-fill" id="progressFill"></div>
+    <div class="main-container">
+        <div class="date-filter-bar">
+            <button class="filter-btn active" data-day="today">Today</button>
+            <button class="filter-btn" data-day="tomorrow">Tomorrow</button>
+            <button class="filter-btn" data-day="day_after">Day After</button>
+        </div>
+        <div class="carousel-container">
+            <div class="carousel-track" id="carousel-track"></div>
+        </div>
+        <div id="no-classes-message">No scheduled classes for this day.</div>
     </div>
-    <span id="remainingTime">-0:00</span>
-    <button class="control-btn" id="fullscreenBtn" title="Fullscreen">
-      <svg viewBox="0 0 24 24"><path d="M7 14v3h3v2H5v-5h2zm0-4H5V5h5v2H7v3zm10 4h2v5h-5v-2h3v-3zm0-4V7h-3V5h5v5h-2z"/></svg>
-    </button>
-  </div>
-</div>
 
-<script>
-  let player, isPlaying = false;
-  const wrapper = document.getElementById('wrapper');
-  const playIcon = document.getElementById('playIcon');
-  const centerControls = document.getElementById('centerControls');
-  const bottomBar = document.getElementById('bottomBar');
-  const progressBar = document.getElementById('progressBar');
-  const progressFill = document.getElementById('progressFill');
-  let controlsVisible = true;
-  let autoHideTimer;
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrdCOyTrQ_uU4jID8hWzCQzaXilhAcGcs", authDomain: "custom-practices.firebaseapp.com",
+            projectId: "custom-practices", storageBucket: "custom-practices.firebasestorage.app",
+            messagingSenderId: "636700937539", appId: "1:636700937539:web:d6ec9d88453e15481d33f6",
+            measurementId: "G-JL58DMTZ0W"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-  const tag = document.createElement('script');
-  tag.src = "https://www.youtube.com/iframe_api";
-  document.body.appendChild(tag);
+        let allFetchedClasses = [];
+        let classesToUpdateTimers = [];
+        const subjectImages = { BOTANY: "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp", ZOOLOGY: "https://thumbnail.allen.in/77a7f5fd-b472-40e2-bdf2-eeb6d7fd448a/original.webp", PHYSICS: "https://thumbnail.allen.in/44b3e41c-605c-42f9-87c0-8b39914bf61f/original.webp", CHEMISTRY: "https://thumbnail.allen.in/f4db4125-88e0-4af2-abec-246ad873d39b/original.webp", MATHS: "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp", MATH: "https://thumbnail.allen.in/5219a374-8571-4b38-8dc5-d7e4511dac1b/original.webp", ENGLISH: "https://thumbnail.allen.in/f99e56bd-fa3b-439a-af39-27a1f575e93b/original.webp", SST: "https://thumbnail.allen.in/36818f58-76c9-4dfe-a979-3a529d0b4d3e/original.webp", BIOLOGY: "https://thumbnail.allen.in/7730c962-e6ba-404f-9d68-90f29cb6895e/original.webp" };
 
-  function getVideoId() {
-    const p = new URLSearchParams(window.location.search);
-    const u = p.get("video");
-    if (!u) return "_qgT0bv-juc";
-    try {
-      const yt = new URL(u);
-      if (yt.hostname.includes("youtube.com")) return yt.searchParams.get("v");
-      if (yt.hostname === "youtu.be") return yt.pathname.slice(1);
-    } catch {
-      return u;
-    }
-    return "_qgT0bv-juc";
-  }
+        const carouselTrack = document.getElementById('carousel-track');
+        const noClassesMessage = document.getElementById('no-classes-message');
+        const dateFilterBar = document.querySelector('.date-filter-bar');
 
-  function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-      videoId: getVideoId(),
-      playerVars: { autoplay: 1, controls: 0, modestbranding: 1, mute: 1 },
-      events: {
-        onReady: onPlayerReady,
-        onStateChange: onPlayerStateChange
-      }
-    });
-  }
+        function createClassCard(classData, classId) {
+            const card = document.createElement('div');
+            card.className = 'class-card';
+            card.id = `card-${classId}`;
+            card.innerHTML = `<div class="card-thumbnail"><img src="${subjectImages[classData.subject.toUpperCase()] || subjectImages.BIOLOGY}" alt="${classData.subject}"><div class="subject-tag">${classData.subject}</div><div class="live-badge">LIVE</div></div><div class="card-content"><h3 class="card-title">${classData.title}</h3><p class="card-status"></p><a href="3.html?id=${classId}" class="join-now-btn">Join Now</a></div>`;
+            const timerInfo = { id: classId, startTime: classData.startTime, expireTime: classData.expireTime, statusElement: card.querySelector('.card-status'), liveBadge: card.querySelector('.live-badge') };
+            classesToUpdateTimers.push(timerInfo);
+            updateClassStatus(timerInfo);
+            return card;
+        }
 
-  function onPlayerReady() {
-    player.unMute();
-    const videoId = getVideoId();
-    const savedTime = localStorage.getItem("videoTime_" + videoId);
-    if (savedTime) player.seekTo(parseFloat(savedTime), true);
-    setInterval(() => {
-      if (player && player.getCurrentTime) {
-        localStorage.setItem("videoTime_" + videoId, player.getCurrentTime());
-      }
-    }, 5000);
-    document.getElementById("playPause").addEventListener("click", () => {
-      isPlaying ? player.pauseVideo() : player.playVideo();
-    });
-    document.getElementById("rewind").addEventListener("click", () => {
-      player.seekTo(player.getCurrentTime() - 10, true);
-    });
-    document.getElementById("forward").addEventListener("click", () => {
-      player.seekTo(player.getCurrentTime() + 10, true);
-    });
-    document.getElementById("fullscreenBtn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (!document.fullscreenElement) {
-        wrapper.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
-    });
-    wrapper.addEventListener("dblclick", () => {
-      if (!document.fullscreenElement) {
-        wrapper.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
-    });
-    wrapper.addEventListener("click", () => {
-      toggleControls();
-    });
-    showControls();
-    setInterval(() => {
-      if (!player || !player.getDuration) return;
-      const current = player.getCurrentTime();
-      const total = player.getDuration();
-      const percent = (current / total) * 100;
-      progressFill.style.width = percent + "%";
-      document.getElementById("currentTime").textContent = formatTime(current);
-      document.getElementById("remainingTime").textContent = "-" + formatTime(total - current);
-    }, 500);
-    progressBar.addEventListener("click", (e) => {
-      const rect = progressBar.getBoundingClientRect();
-      const pct = (e.clientX - rect.left) / rect.width;
-      const time = pct * player.getDuration();
-      player.seekTo(time, true);
-    });
-  }
+        function updateClassStatus(classInfo) {
+            const now = new Date(), startTime = new Date(classInfo.startTime);
+            const timeString = startTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+            const diffMinutes = (startTime - now) / (1000 * 60);
+            
+            classInfo.liveBadge.classList.remove('visible');
+            if (diffMinutes > 60) {
+                classInfo.statusElement.innerHTML = `Starts at <strong>${timeString}</strong>`;
+            } else if (diffMinutes > 0) {
+                classInfo.statusElement.innerHTML = `Starts in <strong>${Math.round(diffMinutes)} min</strong>`;
+            } else {
+                const minutesAgo = Math.round(Math.abs(diffMinutes));
+                classInfo.statusElement.innerHTML = `Started <span class="time">${minutesAgo} min ago</span>`;
+                classInfo.liveBadge.classList.add('visible');
+            }
+        }
+        
+        function checkExpiredClasses() {
+            const now = new Date();
+            const expiredClassesIds = [];
+            classesToUpdateTimers.forEach(timerInfo => { if (now >= new Date(timerInfo.expireTime)) expiredClassesIds.push(timerInfo.id); });
+            if (expiredClassesIds.length > 0) {
+                expiredClassesIds.forEach(id => {
+                    const cardToRemove = document.getElementById(`card-${id}`);
+                    if (cardToRemove) cardToRemove.remove();
+                });
+                allFetchedClasses = allFetchedClasses.filter(c => !expiredClassesIds.includes(c.id));
+                classesToUpdateTimers = classesToUpdateTimers.filter(t => !expiredClassesIds.includes(t.id));
+                if (carouselTrack.children.length === 0) noClassesMessage.style.display = 'block';
+            }
+        }
+        
+        function displayClassesForDay(day) {
+            carouselTrack.innerHTML = '';
+            const now = new Date(), todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            let filterStartDate, filterEndDate;
+            if (day === 'today') { filterStartDate = todayStart; filterEndDate = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000); } 
+            else if (day === 'tomorrow') { filterStartDate = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000); filterEndDate = new Date(filterStartDate.getTime() + 24 * 60 * 60 * 1000); } 
+            else { filterStartDate = new Date(todayStart.getTime() + 48 * 60 * 60 * 1000); filterEndDate = new Date(filterStartDate.getTime() + 24 * 60 * 60 * 1000); }
+            const classesForDay = allFetchedClasses.filter(c => new Date(c.startTime) >= filterStartDate && new Date(c.startTime) < filterEndDate);
+            noClassesMessage.style.display = classesForDay.length === 0 ? 'block' : 'none';
+            carouselTrack.style.display = classesForDay.length === 0 ? 'none' : 'flex';
+            classesForDay.forEach(item => { if (item.cardElement) carouselTrack.appendChild(item.cardElement); });
+        }
+        
+        function initializePage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const classFilter = urlParams.get('class');
+            if (!classFilter) {
+                noClassesMessage.innerHTML = 'Please specify a class in the URL, e.g., ?class=12NEET';
+                noClassesMessage.style.display = 'block'; return;
+            }
+            
+            const query = db.collection("classes")
+                .where("classLevel", "==", classFilter)
+                .where("expireTime", ">=", new Date().toISOString())
+                .orderBy("expireTime", "asc");
+            
+            query.onSnapshot(snapshot => {
+                allFetchedClasses = [];
+                classesToUpdateTimers = [];
+                snapshot.forEach(doc => {
+                    const classData = doc.data();
+                    classData.id = doc.id;
+                    classData.cardElement = createClassCard(classData, doc.id);
+                    allFetchedClasses.push(classData);
+                });
+                const activeDay = document.querySelector('.filter-btn.active').dataset.day;
+                displayClassesForDay(activeDay);
+            }, error => {
+                console.error("Firebase query failed:", error);
+                noClassesMessage.innerHTML = `<b>Error:</b> Could not load classes. Please ensure the Firestore index for (classLevel ASC, expireTime ASC) is enabled.`;
+                noClassesMessage.style.display = 'block';
+            });
 
-  function onPlayerStateChange(e) {
-    if (e.data === YT.PlayerState.PLAYING) {
-      isPlaying = true;
-      playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-    } else {
-      isPlaying = false;
-      playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-    }
-    if (e.data === YT.PlayerState.ENDED) {
-      localStorage.removeItem("videoTime_" + getVideoId());
-    }
-  }
+            setInterval(() => classesToUpdateTimers.forEach(updateClassStatus), 1000); 
+            setInterval(checkExpiredClasses, 5000);
+            setupCarouselDrag();
+        }
 
-  function showControls() {
-    centerControls.style.display = "flex";
-    bottomBar.style.display = "flex";
-    controlsVisible = true;
-    clearTimeout(autoHideTimer);
-    autoHideTimer = setTimeout(hideControls, 3000);
-  }
+        function setupCarouselDrag() {
+            const slider = carouselTrack;
+            let isDown = false, startX, scrollLeft;
+            slider.addEventListener('mousedown', (e) => { isDown = true; slider.classList.add('active'); startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; });
+            slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('active'); });
+            slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('active'); });
+            slider.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - slider.offsetLeft; const walk = (x - startX) * 2; slider.scrollLeft = scrollLeft - walk; });
+        }
+        
+        dateFilterBar.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON' && !e.target.classList.contains('active')) {
+                document.querySelector('.filter-btn.active').classList.remove('active');
+                e.target.classList.add('active');
+                displayClassesForDay(e.target.dataset.day);
+            }
+        });
 
-  function hideControls() {
-    centerControls.style.display = "none";
-    bottomBar.style.display = "none";
-    controlsVisible = false;
-  }
-
-  function toggleControls() {
-    controlsVisible ? hideControls() : showControls();
-  }
-
-  function formatTime(sec) {
-    const minutes = Math.floor(sec / 60);
-    const seconds = Math.floor(sec % 60).toString().padStart(2, "0");
-    return `${minutes}:${seconds}`;
-  }
-</script>
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
 </body>
 </html>
